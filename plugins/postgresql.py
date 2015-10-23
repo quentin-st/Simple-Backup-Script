@@ -10,8 +10,9 @@ class PostgreSQL:
         tmp_filepath = stdio.simple_exec('mktemp')
 
         # Dump db
-        stdio.ppexec('pg_dump -Fc {database} > {file_path}'.format(
+        stdio.ppexec('pg_dump {database} -U {user} -h localhost -f {file_path} --no-password'.format(
             database=backup.get('database'),
+            user=backup.get('database_user', backup.get('database')),
             file_path=tmp_filepath
         ))
 

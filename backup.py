@@ -73,6 +73,9 @@ def do_backup(backup):
     # Send it to the moon
     send_file(backup, backup_filepath)
 
+    # Delete the file
+    stdio.ppexec('rm {file_path}'.format(backup_filepath))
+
     return
 
 

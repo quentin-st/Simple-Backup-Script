@@ -32,3 +32,17 @@ Its content looks like this:
             'dir': '/home/john/backups/'
         }
     }
+
+### Plugin-specific considerations
+## PostgreSQL
+We have to be careful about authorizations. You'll have to create a `.pgpass` file in the cron user's home directory with the
+following syntax: `hostname:port:database:username:password`, for example:
+
+    localhost:5432:db_name:db_user:password
+
+In doubt, you can check postgres's port with `sudo netstat -plunt |grep postgres`.
+
+Then, `chmod 600 /home/cron_user/.pgpass`. Running `ls -al /home/cron_user/` must look like this afterwards:
+
+    -rw-------  1 cron_user cron_user   [...] .pgpass
+

@@ -5,7 +5,10 @@ BACKUPS = [
     {
         'name': 'my_backup',
         'profile': 'postgresql',
+
         'database': 'myDb',
+        'database_user': '',
+
         'target': {
             'host': 'bkup.domain.com',
             'port': 22,
