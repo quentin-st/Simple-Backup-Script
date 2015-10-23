@@ -75,7 +75,7 @@ def do_backup(backup):
     send_file(backup, backup_filepath)
 
     # Delete the file
-    stdio.ppexec('rm {file_path}'.format(backup_filepath))
+    stdio.ppexec('rm {}'.format(backup_filepath))
 
     return
 
