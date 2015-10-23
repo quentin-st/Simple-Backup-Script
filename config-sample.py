@@ -8,6 +8,14 @@ BACKUPS = [
 
         'database': 'myDb',
         'database_user': ''
+    },
+    {
+        'name': 'my_backup2',
+        'profile': 'mysql',
+
+        'database': 'myDb',
+        'database_user': '',
+        'database_password': ''
     }
     #, { ... }
 ]
