@@ -57,6 +57,7 @@ def send_file(backup, backup_filepath):
                     conn.chdir(current_dir)
                     pass
 
+        # Build destination filename
         dest_file_name = '{hostname}-{timestamp}-{backup_name}.{file_extension}'.format(
             hostname=socket.gethostname(),
             timestamp=time.strftime("%Y%m%d-%H%M"),
@@ -67,14 +68,6 @@ def send_file(backup, backup_filepath):
         print(CBOLD+LGREEN, "\n==> Starting transfer: {} => {}".format(backup_filepath, dest_file_name), CRESET)
 
         conn.put(backup_filepath, target_dir+dest_file_name)
-
-        # stdio.ppexec('scp -P {port} {user}@{host}:{remote_path} {local_path}'.format(
-        #    user=target.get('user'),
-        #    host=target.get('host'),
-        #    port=target.get('port', 22),
-        #    remote_path=remote_path,
-        #    local_path=backup_filepath
-        # ))
 
         print(CBOLD+LGREEN, "\n==> Transfer finished.", CRESET)
 
@@ -106,6 +99,8 @@ def do_backup(backup):
 
     # Delete the file
     stdio.ppexec('rm {}'.format(backup_filepath))
+
+    plugin.clean()
 
     return
 

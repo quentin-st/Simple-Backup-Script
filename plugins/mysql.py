@@ -1,5 +1,6 @@
 import tarfile
 import os
+import shutil
 
 from utils import stdio
 
@@ -12,9 +13,13 @@ class MySQL:
     key_name = "mysql"
     file_extension = "tar.gz"
 
+    def __init__(self):
+        self.temp_dir = ''
+
     def create_backup_file(self, backup):
         # Create temporary working directory
         tmp_dir = stdio.simple_exec('mktemp',  '--directory')
+        self.temp_dir = tmp_dir
 
         # Create tar file
         saved_path = os.getcwd()
@@ -24,20 +29,24 @@ class MySQL:
 
         # Loop over databases
         for database in backup.get('databases'):
-            db_filepath = database + '.sql'
+            db_filename = database + '.sql'
 
             # Dump db
             stdio.ppexec('mysqldump -u {user} -p{password} {database} | gzip > {file_path}'.format(
                 user=backup.get('database_user'),
                 password=backup.get('database_password'),
                 database=database,
-                file_path=db_filepath
+                file_path=db_filename
             ))
 
-            tar.add(db_filepath)
+            tar.add(db_filename)
 
         tar.close()
 
         os.chdir(saved_path)
 
         return tmp_dir + '/archive.tar.gz'
+
+    def clean(self):
+        if self.temp_dir and os.path.isdir(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
