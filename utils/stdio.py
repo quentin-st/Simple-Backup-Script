@@ -19,4 +19,4 @@ def ppexec(cmd):
 
 
 def simple_exec(cmd):
-    return Popen(cmd, stdout=PIPE).communicate()[0]
+    return Popen(cmd, stdout=PIPE).communicate()[0].decode('UTF-8').strip()

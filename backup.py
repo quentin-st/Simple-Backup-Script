@@ -17,8 +17,9 @@ from utils.stdio import CRESET, CBOLD, LGREEN
 
 def get_supported_backup_profiles():
     plugins_list = {}
-    for plugin_pkg_name, plugin_pkg in inspect.getmembers(plugins, inspect.isclass):
-        plugins_list[plugin_pkg_name] = plugin_pkg
+    for plugin_pkg_name, plugin_pkg in inspect.getmembers(plugins, inspect.ismodule):
+        # Get class from this member
+        plugins_list[plugin_pkg_name] = plugin_pkg.get_main_class()
     return plugins_list
 
 
@@ -68,7 +69,7 @@ def do_backup(backup):
     print(CBOLD+LGREEN, "\n==> Creating backup file", CRESET)
     plugin = profiles[backup_profile]()
     backup_filepath = plugin.create_backup_file(backup)
-    backup.set('file_extension', plugin.file_extension)
+    backup['file_extension'] = plugin.file_extension
 
     # Send it to the moon
     send_file(backup, backup_filepath)

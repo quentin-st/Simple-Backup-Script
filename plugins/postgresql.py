@@ -1,6 +1,10 @@
 from utils import stdio
 
 
+def get_main_class():
+    return PostgreSQL
+
+
 class PostgreSQL:
     key_name = "postgresql"
     file_extension = ".sql"
