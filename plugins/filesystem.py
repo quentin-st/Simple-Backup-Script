@@ -29,7 +29,7 @@ class Filesystem:
 
         # Loop over directories
         for directory in backup.get('directories'):
-            tar.add(directory)
+            tar.add(directory, arcname=os.path.basename(os.path.normpath(directory)))
 
         tar.close()
 

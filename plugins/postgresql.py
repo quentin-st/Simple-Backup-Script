@@ -38,7 +38,7 @@ class PostgreSQL():
                 file_path=db_filename
             ))
 
-            tar.add(db_filename)
+            tar.add(os.path.basename(os.path.normpath(db_filename)))
 
         tar.close()
 
