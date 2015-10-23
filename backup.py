@@ -58,9 +58,10 @@ def send_file(backup, backup_filepath):
                     pass
 
         # Build destination filename
-        dest_file_name = '{hostname}-{timestamp}-{backup_name}.{file_extension}'.format(
+        dest_file_name = '{hostname}-{timestamp}-{backup_profile}-{backup_name}.{file_extension}'.format(
             hostname=socket.gethostname(),
             timestamp=time.strftime("%Y%m%d-%H%M"),
+            backup_profile=backup.get('profile'),
             backup_name=backup.get('name'),
             file_extension=backup.get('file_extension')
         )
