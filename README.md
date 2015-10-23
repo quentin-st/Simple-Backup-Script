@@ -1,6 +1,11 @@
 # Simple-Backup-Script
 The purpose of this script is to offer a generic way to backup files or databases and send those backups to remote hosts.
 
+## Prerequisites
+This script relies on the `pysftp` module:
+
+    sudo pip install pysftp
+
 ## How does it works?
 There are two customizable steps in this process:
 

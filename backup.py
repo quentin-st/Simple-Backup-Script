@@ -5,6 +5,7 @@ import inspect
 import argparse
 import time
 import socket
+import pysftp
 
 import plugins
 from plugins import *
@@ -25,28 +26,56 @@ def get_supported_backup_profiles():
 
 def send_file(backup, backup_filepath):
     target = backup.get('target')
+    target_dir = target.get('dir')
 
-    # Build remote filepath
-    remote_path = '{dir}{hostname}-{timestamp}-{backup_name}.{file_extension}'.format(
-        dir=target.get('dir'),
+    print(CBOLD+LGREEN, "\n==> Connecting to {}...".format(target.get('host')), CRESET)
+
+    # YESTERDAY YOU SAID TOMORROW
+    # Init SFTP connection
+    conn = pysftp.Connection(
+        host=target.get('host'),
+        username=target.get('user'),
+        port=target.get('port', 22)
+    )
+    conn._transport.set_keepalive(30)
+
+    # Create destination directory if necessary
+    try:
+        # Try...
+        conn.chdir(target_dir)
+    except IOError:
+        # Create directories
+        current_dir = ''
+        for dir in target_dir.split('/'):
+            current_dir += dir + '/'
+            try:
+                conn.chdir(current_dir)
+            except:
+                print('Creating missing directory: ' + current_dir)
+                conn.mkdir(current_dir)
+                conn.chdir(current_dir)
+                pass
+
+    dest_file_name = '{hostname}-{timestamp}-{backup_name}.{file_extension}'.format(
         hostname=socket.gethostname(),
         timestamp=time.strftime("%Y%m%d-%H%M"),
         backup_name=backup.get('name'),
         file_extension=backup.get('file_extension')
     )
 
-    print(CBOLD+LGREEN, "\n==> Starting transfer for {} from {} to {}".format(backup.get('name'), backup_filepath, remote_path), CRESET)
+    print(CBOLD+LGREEN, "\n==> Starting transfer: {} => {}".format(backup_filepath, dest_file_name), CRESET)
 
-    # YESTERDAY YOU SAID TOMORROW
-    stdio.ppexec('scp -P {port} {user}@{host}:{remote_path} {local_path}'.format(
-        user=target.get('user'),
-        host=target.get('host'),
-        port=target.get('port', 22),
-        remote_path=remote_path,
-        local_path=backup_filepath
-    ))
+    conn.put(backup_filepath, target_dir+dest_file_name)
 
-    print(CBOLD+LGREEN, "\n==> Transfer finished.".format(backup_filepath, remote_path), CRESET)
+    # stdio.ppexec('scp -P {port} {user}@{host}:{remote_path} {local_path}'.format(
+    #    user=target.get('user'),
+    #    host=target.get('host'),
+    #    port=target.get('port', 22),
+    #    remote_path=remote_path,
+    #    local_path=backup_filepath
+    # ))
+
+    print(CBOLD+LGREEN, "\n==> Transfer finished.", CRESET)
 
     return
 
