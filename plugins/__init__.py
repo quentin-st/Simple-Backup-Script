@@ -1,1 +1,1 @@
-__all__ = ['postgresql', 'mysql']
+__all__ = ['postgresql', 'mysql', 'filesystem']
