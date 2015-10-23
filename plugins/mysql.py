@@ -1,3 +1,6 @@
+import tarfile
+import os
+
 from utils import stdio
 
 
@@ -10,12 +13,19 @@ class MySQL:
     file_extension = "tar.gz"
 
     def create_backup_file(self, backup):
-        # Create temporary directory
+        # Create temporary working directory
         tmp_dir = stdio.simple_exec('mktemp',  '--directory')
+
+        # Create tar file
+        saved_path = os.getcwd()
+        os.chdir(tmp_dir)
+
+        tar = tarfile.open('archive.tar.gz', 'w:gz')
 
         # Loop over databases
         for database in backup.get('databases'):
-            db_filepath = tmp_dir + '/' + database + '.sql'
+            db_filepath = database + '.sql'
+
             # Dump db
             stdio.ppexec('mysqldump -u {user} -p{password} {database} | gzip > {file_path}'.format(
                 user=backup.get('database_user'),
@@ -24,13 +34,10 @@ class MySQL:
                 file_path=db_filepath
             ))
 
-        # Create temp file
-        tmp_file = stdio.simple_exec('mktemp')
+            tar.add(db_filepath)
 
-        # Compress temp directory
-        stdio.ppexec('cd {dir} && tar -cvzf {file} ./*'.format(
-            file=tmp_file,
-            dir=tmp_dir
-        ))
+        tar.close()
 
-        return tmp_file
+        os.chdir(saved_path)
+
+        return tmp_dir + '/archive.tar.gz'

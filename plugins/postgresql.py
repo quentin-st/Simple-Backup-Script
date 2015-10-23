@@ -1,3 +1,6 @@
+import tarfile
+import os
+
 from utils import stdio
 
 
@@ -10,12 +13,19 @@ class PostgreSQL:
     file_extension = "tar.gz"
 
     def create_backup_file(self, backup):
-        # Create temporary directory
+        # Create temporary working directory
         tmp_dir = stdio.simple_exec('mktemp', '--directory')
+
+        # Create tar file
+        saved_path = os.getcwd()
+        os.chdir(tmp_dir)
+
+        tar = tarfile.open('archive.tar.gz', 'w:gz')
 
         # Loop over databases
         for database in backup.get('databases'):
-            db_filepath = tmp_dir + '/' + database + '.sql'
+            db_filepath = database + '.sql'
+
             # Dump db
             stdio.ppexec('pg_dump {database} -U {user} -h localhost -f {file_path} --no-password'.format(
                 database=database,
@@ -23,13 +33,10 @@ class PostgreSQL:
                 file_path=db_filepath
             ))
 
-        # Create temp file
-        tmp_file = stdio.simple_exec('mktemp')
+            tar.add(db_filepath)
 
-        # Compress temp directory
-        stdio.ppexec('cd {dir} && tar -cvzf {file} ./*'.format(
-            dir=tmp_dir,
-            file=tmp_file
-        ))
+        tar.close()
 
-        return tmp_file
+        os.chdir(saved_path)
+
+        return tmp_dir + '/archive.tar.gz'
