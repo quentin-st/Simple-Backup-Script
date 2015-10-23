@@ -16,12 +16,9 @@ from utils.stdio import CRESET, CBOLD, LGREEN
 # Functions
 
 def get_supported_backup_profiles():
-    """Registers the supported project types"""
-    plugins_list = {}
+    plugins_list = []
     for plugin_pkg_name, plugin_pkg in inspect.getmembers(plugins, inspect.ismodule):
-        plugin_variants = plugin_pkg.register_variants()
-        for plugin_variant in plugin_variants:
-            plugins_list[plugin_variant.key_name] = plugin_variant
+        plugins_list.append(plugin_pkg_name)
     return plugins_list
 
 
