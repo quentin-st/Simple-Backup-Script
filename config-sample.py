@@ -16,6 +16,12 @@ BACKUPS = [
         'databases': ['myDb1', 'myDb2'],
         'database_user': '',
         'database_password': ''
+    },
+    {
+        'name': 'my_backup3',
+        'profile': 'filesystem',
+
+        'directories': ['/var/www/']
     }
     #, { ... }
 ]
