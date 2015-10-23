@@ -6,6 +6,12 @@ This script relies on the `pysftp` module:
 
     sudo pip install pysftp
 
+
+*Sidenote*: Please be aware that since we use Python 3, you have to make sure that `pip` installs the module for **Python 3**. If your system ships with Python 2 as the default interpreter, `pip install pysftp` will install `pysftp` for **Python 2**.
+In that case, you might want to install `pip3` and run :
+
+    sudo pip3 install pysftp
+
 ## How does it works?
 There are two customizable steps in this process:
 
