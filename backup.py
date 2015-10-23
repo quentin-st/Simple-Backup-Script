@@ -3,6 +3,9 @@
 import sys
 import inspect
 import argparse
+import time
+import socket
+
 import plugins
 from plugins import *
 from config import BACKUPS
@@ -23,23 +26,23 @@ def get_supported_backup_profiles():
 
 
 def send_file(backup, backup_filepath):
-    # Get connection information
     target = backup.get('target')
-    host = target.get('host')
-    port = target.get('port', 22)
-    user = target.get('user')
-    dir = target.get('dir')
 
     # Build remote filepath
-    remote_path = dir + backup.name  # TODO
+    remote_path = '{dir}{hostname}-{timestamp}-{backup_name}'.format(
+        dir=target.get('dir'),
+        hostname=socket.gethostname(),
+        timestamp=time.strftime("%Y%m%d-%H%M"),
+        backup_name=backup.get('name')
+    )
 
-    print(CBOLD+LGREEN, "\n==> Starting transfer for {} from {} to {}".format(backup.name, backup_filepath, remote_path), CRESET)
+    print(CBOLD+LGREEN, "\n==> Starting transfer for {} from {} to {}".format(backup.get('name'), backup_filepath, remote_path), CRESET)
 
     # YESTERDAY YOU SAID TOMORROW
     stdio.ppexec('scp -P {port} {user}@{host}:{remote_path} {local_path}'.format(
-        user=user,
-        host=host,
-        port=port,
+        user=target.get('user'),
+        host=target.get('host'),
+        port=target.get('port', 22),
         remote_path=remote_path,
         local_path=backup_filepath
     ))
@@ -50,7 +53,7 @@ def send_file(backup, backup_filepath):
 
 
 def get_backup(backup_name):
-    candidates = [b for b in BACKUPS if b['name'] == backup_name]
+    candidates = [b for b in BACKUPS if b.get('name') == backup_name]
     return candidates[0] if len(candidates) == 1 else None
 
 
@@ -66,7 +69,7 @@ def do_backup(backup):
     # JUST DO IT
     print(CBOLD+LGREEN, "\n==> Creating backup file", CRESET)
     plugin = profiles[backup_profile]()
-    backup_filepath = getattr(plugin, 'create_backup_file')()
+    backup_filepath = getattr(plugin, 'create_backup_file')(backup)
 
     # Send it to the moon
     send_file(backup, backup_filepath)
@@ -87,7 +90,7 @@ args = parser.parse_args()
 if args.backup == 'ask_for_it':
     print("Please select a backup profile to execute")
     for i, project in enumerate(BACKUPS):
-        print("\t[{}] {}".format(str(i), project.name))
+        print("\t[{}] {}".format(str(i), project.get('name')))
 
     backup_index = -1
     is_valid = 0

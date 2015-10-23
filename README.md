@@ -5,11 +5,11 @@ The purpose of this script is to offer a generic way to backup files or database
 There are two customizable steps in this process:
 
 ### Backup
-This step copies the file or dumps the database and put everything in a .tar.gz file.
+This step copies the file or dumps the database and put everything in a single file.
 All the logic behind this is contained in a plugin. If you cannot find a suitable plugin (check /plugins)
 for the content you're trying to save, don't hesitate to create a pull request.
 
-A plugin is quite simple: all it does is to run commands to create the .tar.gz file, and returns its complete file path.
+A plugin is quite simple: all it does is to run commands to create the single file, and returns its complete file path.
 
 ### Transfer
 Once we created the backup file, let's transfer it. See configuration below for more information.
@@ -32,4 +32,3 @@ Its content looks like this:
             'dir': '/home/john/backups/'
         }
     }
-
