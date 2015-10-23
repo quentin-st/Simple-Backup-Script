@@ -119,7 +119,7 @@ args = parser.parse_args()
 if args.backup == 'ask_for_it':
     print("Please select a backup profile to execute")
     for i, project in enumerate(BACKUPS):
-        print("\t[{}] {}".format(str(i), project.get('name')))
+        print("\t[{}] {} ({})".format(str(i), project.get('name'), project.get('profile')))
 
     backup_index = -1
     is_valid = 0
