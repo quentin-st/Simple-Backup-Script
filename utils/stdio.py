@@ -18,5 +18,5 @@ def ppexec(cmd):
         print(CDIM, "   " + line.decode("utf-8"), CRESET)
 
 
-def simple_exec(cmd):
-    return Popen(cmd, stdout=PIPE).communicate()[0].decode('UTF-8').strip()
+def simple_exec(cmd, args=None):
+    return Popen([cmd, args] if args else cmd, stdout=PIPE).communicate()[0].decode('UTF-8').strip()

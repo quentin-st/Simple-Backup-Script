@@ -11,15 +11,15 @@ class PostgreSQL:
 
     def create_backup_file(self, backup):
         # Create temporary directory
-        tmp_dir = stdio.simple_exec('mktemp --directory')
+        tmp_dir = stdio.simple_exec('mktemp', '--directory')
 
         # Loop over databases
         for database in backup.get('databases'):
             db_filepath = tmp_dir + '/' + database + '.sql'
             # Dump db
             stdio.ppexec('pg_dump {database} -U {user} -h localhost -f {file_path} --no-password'.format(
-                database=backup.get('database'),
-                user=backup.get('database_user', backup.get('database')),
+                database=database,
+                user=backup.get('database_user', database),
                 file_path=db_filepath
             ))
 
@@ -27,9 +27,9 @@ class PostgreSQL:
         tmp_file = stdio.simple_exec('mktemp')
 
         # Compress temp directory
-        stdio.ppexec('tar -cvzf {file} {dir}'.format(
-            file=tmp_file,
-            dir=tmp_dir + '/*'
+        stdio.ppexec('cd {dir} && tar -cvzf {file} ./*'.format(
+            dir=tmp_dir,
+            file=tmp_file
         ))
 
         return tmp_file
