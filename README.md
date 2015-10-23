@@ -1,6 +1,7 @@
 # Simple-Backup-Script
 The purpose of this script is to offer a generic way to backup files or databases and send those backups to remote hosts.
 
+
 ## Prerequisites
 This script relies on the `pysftp` module:
 
@@ -12,6 +13,7 @@ In that case, you might want to install `pip3` and run :
 
     sudo pip3 install pysftp
 
+
 ## How does it works?
 There are two customizable steps in this process:
 
@@ -21,6 +23,7 @@ All the logic behind this is contained in a plugin. If you cannot find a suitabl
 for the content you're trying to save, don't hesitate to create a pull request.
 
 A plugin is quite simple: all it does is to run commands to create the single file, and returns its complete file path.
+It also contains a `clean` function to delete temporary files created during its execution.
 
 ### Transfer
 Once we created the backup file, let's transfer it. See configuration below for more information.
@@ -35,8 +38,20 @@ Its content looks like this:
         'profile': '',          # This is the name of the plugin
         
                                 # The whole backup node is sent to the plugin:
-        'database': 'myDb',     # here are some specific keys
+        'databases': ['myDb'],  # here are some specific keys
     }
+
+Check the `config-sample.py` for some information: it contains a sample configuration for each plugin.
+
+## Usage
+You can either run it in its interactive mode (default), or specify the backup you want to achieve:
+
+    # Interactive mode:
+    ./backup.py
+    
+    # or
+    ./backup.py --backup my_backup
+
 
 ### Plugin-specific considerations
 ## PostgreSQL
