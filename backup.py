@@ -26,11 +26,26 @@ def send_file(backup, backup_filepath):
     # Get connection information
     target = backup.get('target')
     host = target.get('host')
+    port = target.get('port', 22)
     user = target.get('user')
     dir = target.get('dir')
 
+    # Build remote filepath
+    remote_path = dir + backup_filepath  # TODO
+
+    print(CBOLD+LGREEN, "\n==> Starting transfer from {} to {}".format(backup_filepath, remote_path), CRESET)
+
     # YESTERDAY YOU SAID TOMORROW
-    
+    stdio.ppexec('scp -P {port} {user}@{host}:{remote_path} {local_path}'.format(
+        user=user,
+        host=host,
+        port=port,
+        remote_path=remote_path,
+        local_path=backup_filepath
+    ))
+
+    print(CBOLD+LGREEN, "\n==> Transfer finished.".format(backup_filepath, remote_path), CRESET)
+
     return
 
 
@@ -49,7 +64,7 @@ def do_backup(backup_name):
         print("Unknown project type \"{}\".".format(backup_profile))
         sys.exit(1)
 
-    # DO IT
+    # JUST DO IT
     print(CBOLD+LGREEN, "\n==> Creating backup file", CRESET)
     plugin = profiles[backup_profile]()
     backup_filepath = getattr(plugin, 'create_backup_file')()

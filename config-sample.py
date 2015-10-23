@@ -8,6 +8,7 @@ BACKUPS = {
         'database': 'myDb',
         'target': {
             'host': 'bkup.domain.com',
+            'port': 22,
             'user': 'john',
             'dir': '/home/john/backups/'
         }

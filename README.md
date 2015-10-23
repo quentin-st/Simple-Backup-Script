@@ -14,6 +14,8 @@ A plugin is quite simple: all it does is to run commands to create the .tar.gz f
 ### Transfer
 Once we created the backup file, let's transfer it. See configuration below for more information.
 
+**Note**: *SSH Public Key Authentication* **must** be set up or the script won't connect to your backup targets.
+
 ## Configuration
 Copy or rename `config-sample.py` to get `config.py`.
 Its content looks like this:
