@@ -29,8 +29,19 @@ class Filesystem:
         # Create tar file
         tar = tarfile.open('archive.tar.gz', 'w:gz')
 
-        # Loop over directories
+        # Pre-process directories list: [/var/www/*] must be replaced with [/var/www/dir1/, /var/www/dir2/],
+        directories = []
         for directory in backup.get('directories'):
+            if directory.endswith('*'):
+                real_name = directory[:-1]
+                for name in os.listdir(real_name):
+                    directories.append(real_name+name+'/')
+            else:
+                directories.append(directory)
+
+
+        # Loop over directories
+        for directory in directories:
             dir_name = os.path.basename(os.path.normpath(directory))
 
             # Create single tar.gz file for this dir
