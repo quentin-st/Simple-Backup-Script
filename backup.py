@@ -66,7 +66,7 @@ def do_backup(backup):
 
     # JUST DO IT
     print(CBOLD+LGREEN, "\n==> Creating backup file", CRESET)
-    plugin = profiles[backup_profile]()
+    plugin = profiles[backup_profile].create_backup_file()
     backup_filepath = getattr(plugin, 'create_backup_file')(backup)
     backup.set('file_extension', getattr(plugin, 'file_extension'))
 
