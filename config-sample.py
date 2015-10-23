@@ -6,14 +6,14 @@ BACKUPS = [
         'name': 'my_backup',
         'profile': 'postgresql',
 
-        'database': 'myDb',
+        'databases': ['myDb'],
         'database_user': ''
     },
     {
         'name': 'my_backup2',
         'profile': 'mysql',
 
-        'database': 'myDb',
+        'databases': ['myDb1', 'myDb2'],
         'database_user': '',
         'database_password': ''
     }
