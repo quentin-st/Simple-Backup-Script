@@ -11,7 +11,7 @@ class MySQL:
 
     def create_backup_file(self, backup):
         # Create temporary directory
-        tmp_dir = stdio.simple_exec('mktemp --directory')
+        tmp_dir = stdio.simple_exec('mktemp',  '--directory')
 
         # Loop over databases
         for database in backup.get('databases'):
@@ -28,9 +28,9 @@ class MySQL:
         tmp_file = stdio.simple_exec('mktemp')
 
         # Compress temp directory
-        stdio.ppexec('tar -cvzf {file} {dir}'.format(
+        stdio.ppexec('cd {dir} && tar -cvzf {file} ./*'.format(
             file=tmp_file,
-            dir=tmp_dir + '/*'
+            dir=tmp_dir
         ))
 
         return tmp_file
