@@ -23,7 +23,7 @@ Its content looks like this:
     'my_backup': {              # That's the backup name: no special chars nor spaces please
         'profile': '',          # This is the name of the plugin
         
-        'host': 'localhost',    # The whole backup node is sent to the plugin:
+                                # The whole backup node is sent to the plugin:
         'database': 'myDb',     # here are some specific keys
         
         'target': {             # This allows to sftp the backup file to the remote host

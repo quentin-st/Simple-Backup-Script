@@ -5,7 +5,6 @@ BACKUPS = [
     {
         'name': 'my_backup',
         'profile': 'postgresql',
-        'host': 'localhost',
         'database': 'myDb',
         'target': {
             'host': 'bkup.domain.com',
