@@ -9,7 +9,7 @@ import pysftp
 
 import plugins
 from plugins import *
-from config import BACKUPS
+from config import BACKUPS, TARGETS
 from utils import stdio
 from utils.stdio import CRESET, CBOLD, LGREEN
 
@@ -25,57 +25,58 @@ def get_supported_backup_profiles():
 
 
 def send_file(backup, backup_filepath):
-    target = backup.get('target')
-    target_dir = target.get('dir')
+    # Send the file to each target
+    for target in TARGETS:
+        target_dir = target.get('dir')
 
-    print(CBOLD+LGREEN, "\n==> Connecting to {}...".format(target.get('host')), CRESET)
+        print(CBOLD+LGREEN, "\n==> Connecting to {}...".format(target.get('host')), CRESET)
 
-    # YESTERDAY YOU SAID TOMORROW
-    # Init SFTP connection
-    conn = pysftp.Connection(
-        host=target.get('host'),
-        username=target.get('user'),
-        port=target.get('port', 22)
-    )
-    conn._transport.set_keepalive(30)
+        # YESTERDAY YOU SAID TOMORROW
+        # Init SFTP connection
+        conn = pysftp.Connection(
+            host=target.get('host'),
+            username=target.get('user'),
+            port=target.get('port', 22)
+        )
+        conn._transport.set_keepalive(30)
 
-    # Create destination directory if necessary
-    try:
-        # Try...
-        conn.chdir(target_dir)
-    except IOError:
-        # Create directories
-        current_dir = ''
-        for dir in target_dir.split('/'):
-            current_dir += dir + '/'
-            try:
-                conn.chdir(current_dir)
-            except:
-                print('Creating missing directory: ' + current_dir)
-                conn.mkdir(current_dir)
-                conn.chdir(current_dir)
-                pass
+        # Create destination directory if necessary
+        try:
+            # Try...
+            conn.chdir(target_dir)
+        except IOError:
+            # Create directories
+            current_dir = ''
+            for dir in target_dir.split('/'):
+                current_dir += dir + '/'
+                try:
+                    conn.chdir(current_dir)
+                except:
+                    print('Creating missing directory: ' + current_dir)
+                    conn.mkdir(current_dir)
+                    conn.chdir(current_dir)
+                    pass
 
-    dest_file_name = '{hostname}-{timestamp}-{backup_name}.{file_extension}'.format(
-        hostname=socket.gethostname(),
-        timestamp=time.strftime("%Y%m%d-%H%M"),
-        backup_name=backup.get('name'),
-        file_extension=backup.get('file_extension')
-    )
+        dest_file_name = '{hostname}-{timestamp}-{backup_name}.{file_extension}'.format(
+            hostname=socket.gethostname(),
+            timestamp=time.strftime("%Y%m%d-%H%M"),
+            backup_name=backup.get('name'),
+            file_extension=backup.get('file_extension')
+        )
 
-    print(CBOLD+LGREEN, "\n==> Starting transfer: {} => {}".format(backup_filepath, dest_file_name), CRESET)
+        print(CBOLD+LGREEN, "\n==> Starting transfer: {} => {}".format(backup_filepath, dest_file_name), CRESET)
 
-    conn.put(backup_filepath, target_dir+dest_file_name)
+        conn.put(backup_filepath, target_dir+dest_file_name)
 
-    # stdio.ppexec('scp -P {port} {user}@{host}:{remote_path} {local_path}'.format(
-    #    user=target.get('user'),
-    #    host=target.get('host'),
-    #    port=target.get('port', 22),
-    #    remote_path=remote_path,
-    #    local_path=backup_filepath
-    # ))
+        # stdio.ppexec('scp -P {port} {user}@{host}:{remote_path} {local_path}'.format(
+        #    user=target.get('user'),
+        #    host=target.get('host'),
+        #    port=target.get('port', 22),
+        #    remote_path=remote_path,
+        #    local_path=backup_filepath
+        # ))
 
-    print(CBOLD+LGREEN, "\n==> Transfer finished.", CRESET)
+        print(CBOLD+LGREEN, "\n==> Transfer finished.", CRESET)
 
     return
 

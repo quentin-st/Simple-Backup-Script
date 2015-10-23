@@ -30,12 +30,6 @@ Its content looks like this:
         
                                 # The whole backup node is sent to the plugin:
         'database': 'myDb',     # here are some specific keys
-        
-        'target': {             # This allows to sftp the backup file to the remote host
-            'host': 'bkup.domain.com',
-            'user': 'john',
-            'dir': '/home/john/backups/'
-        }
     }
 
 ### Plugin-specific considerations

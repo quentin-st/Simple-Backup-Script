@@ -7,14 +7,16 @@ BACKUPS = [
         'profile': 'postgresql',
 
         'database': 'myDb',
-        'database_user': '',
-
-        'target': {
-            'host': 'bkup.domain.com',
-            'port': 22,
-            'user': 'john',
-            'dir': '/home/john/backups/'
-        }
+        'database_user': ''
     }
     #, { ... }
+]
+
+TARGETS = [
+    {
+        'host': 'bkup.domain.com',
+        'port': 22,
+        'user': 'john',
+        'dir': '/home/john/backups/'
+    }
 ]
