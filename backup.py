@@ -16,7 +16,7 @@ from utils.stdio import CRESET, CBOLD, LGREEN
 # Functions
 
 def get_supported_backup_profiles():
-    plugins_list = []
+    plugins_list = {}
     for plugin_pkg_name, plugin_pkg in inspect.getmembers(plugins, inspect.ismodule):
         plugins_list[plugin_pkg_name] = plugin_pkg
     return plugins_list
