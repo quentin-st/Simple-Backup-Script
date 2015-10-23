@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-BACKUPS = {
-    'my_backup': {
+BACKUPS = [
+    {
+        'name': 'my_backup',
         'profile': 'postgresql',
         'host': 'localhost',
         'database': 'myDb',
@@ -13,6 +14,5 @@ BACKUPS = {
             'dir': '/home/john/backups/'
         }
     }
-    #,
-    # 'my_other_backup { ... }
-}
+    #, { ... }
+]
