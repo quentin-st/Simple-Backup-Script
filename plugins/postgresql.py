@@ -7,7 +7,7 @@ def get_main_class():
 
 class PostgreSQL:
     key_name = "postgresql"
-    file_extension = ".sql"
+    file_extension = "sql"
 
     def create_backup_file(self, backup):
         # Create temporary file
