@@ -20,7 +20,7 @@ class MySQL:
             stdio.ppexec('mysqldump -u {user} -p{password} {database} | gzip > {file_path}'.format(
                 user=backup.get('database_user'),
                 password=backup.get('database_password'),
-                database=backup.get('database'),
+                database=database,
                 file_path=db_filepath
             ))
 
