@@ -29,11 +29,12 @@ def send_file(backup, backup_filepath):
     target = backup.get('target')
 
     # Build remote filepath
-    remote_path = '{dir}{hostname}-{timestamp}-{backup_name}'.format(
+    remote_path = '{dir}{hostname}-{timestamp}-{backup_name}.{file_extension}'.format(
         dir=target.get('dir'),
         hostname=socket.gethostname(),
         timestamp=time.strftime("%Y%m%d-%H%M"),
-        backup_name=backup.get('name')
+        backup_name=backup.get('name'),
+        file_extension=backup.get('file_extension')
     )
 
     print(CBOLD+LGREEN, "\n==> Starting transfer for {} from {} to {}".format(backup.get('name'), backup_filepath, remote_path), CRESET)
@@ -70,6 +71,7 @@ def do_backup(backup):
     print(CBOLD+LGREEN, "\n==> Creating backup file", CRESET)
     plugin = profiles[backup_profile]()
     backup_filepath = getattr(plugin, 'create_backup_file')(backup)
+    backup.set('file_extension', getattr(plugin, 'file_extension'))
 
     # Send it to the moon
     send_file(backup, backup_filepath)

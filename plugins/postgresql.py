@@ -3,6 +3,7 @@ from utils import stdio
 
 class PostgreSQL:
     key_name = "postgresql"
+    file_extension = ".sql"
 
     def create_backup_file(self, backup):
         # Create temporary file
