@@ -76,6 +76,8 @@ def send_file(backup, backup_filepath):
 
         rotate_backups(target, conn)
 
+        conn.close()
+
     return
 
 
