@@ -1,15 +1,17 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+import os
 import sys
 import inspect
 import argparse
 import time
 import socket
+import datetime
 import pysftp
 
 import plugins
 from plugins import *
-from config import BACKUPS, TARGETS
+from config import BACKUPS, TARGETS, DAYS_TO_KEEP
 from utils import stdio
 from utils.stdio import CRESET, CBOLD, LGREEN
 
@@ -58,7 +60,7 @@ def send_file(backup, backup_filepath):
                     pass
 
         # Build destination filename
-        dest_file_name = '{hostname}-{timestamp}-{backup_profile}-{backup_name}.{file_extension}'.format(
+        dest_file_name = 'backup-{hostname}-{timestamp}-{backup_name}({backup_profile}).{file_extension}'.format(
             hostname=socket.gethostname(),
             timestamp=time.strftime("%Y%m%d-%H%M"),
             backup_profile=backup.get('profile'),
@@ -71,6 +73,8 @@ def send_file(backup, backup_filepath):
         conn.put(backup_filepath, target_dir+dest_file_name)
 
         print(CBOLD+LGREEN, "\n==> Transfer finished.", CRESET)
+
+        rotate_backups(target, conn)
 
     return
 
@@ -102,6 +106,32 @@ def do_backup(backup):
     stdio.ppexec('rm {}'.format(backup_filepath))
 
     plugin.clean()
+
+    return
+
+
+def rotate_backups(target, conn):
+    backup_dir = target.get('dir')
+    # CD to backups dir
+    conn.chdir(backup_dir)
+
+    now = datetime.datetime.now()
+    # Loop over all files in the directory
+    for file in conn.listdir(backup_dir):
+        if file.beginswith('backup-'):
+            fullpath = os.path.join(backup_dir, file)
+
+            if conn.isfile(fullpath):
+                timestamp = conn.stat(fullpath).st_atime
+                createtime = datetime.datetime.fromtimestamp(timestamp)
+                delta = now - createtime
+
+                if delta.days > target.get('days_to_keep', DAYS_TO_KEEP):
+                    print(CBOLD+LGREEN, "\n==> Deleting backup file {file} ({days} days old)".format(
+                        file=file, days=delta
+                    ), CRESET)
+                    conn.unlink(file)
+
 
     return
 

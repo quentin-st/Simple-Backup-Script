@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+DAYS_TO_KEEP = 15
+
 BACKUPS = [
     {
         'name': 'my_backup',
@@ -32,6 +34,7 @@ TARGETS = [
         'host': 'bkup.domain.com',
         'port': 22,
         'user': 'john',
-        'dir': '/home/john/backups/'
+        'dir': '/home/john/backups/',
+        'days_to_keep': 7               # You can override global DAYS_TO_KEEP for each target
     }
 ]

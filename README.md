@@ -32,7 +32,9 @@ Once we created the backup file, let's transfer it. See configuration below for 
 
 ## Configuration
 Copy or rename `config-sample.py` to get `config.py`.
-Its content looks like this:
+
+### Backup profiles
+You can add as many backup profiles as you wish.
 
     'my_backup': {              # That's the backup name: no special chars nor spaces please
         'profile': '',          # This is the name of the plugin
@@ -42,6 +44,19 @@ Its content looks like this:
     }
 
 Check the `config-sample.py` for some information: it contains a sample configuration for each plugin.
+
+### Targets
+Each backup profile will then be sent to every target configured. Here's a sample:
+
+    {
+        'host': 'bkup.domain.com',  # Can either be a local/remote IP address
+        'port': 22,                 # Optional, default 22
+        'user': 'john',
+        'dir': '/home/john/backups/',
+        'days_to_keep': 7           # You can override global DAYS_TO_KEEP for each target
+    }
+
+**Important note**: the dir must only contain backups from this instance. Any other file could be deleted during backups rotation.
 
 ## Usage
 You can either run it in its interactive mode (default), or specify the backup you want to achieve:
