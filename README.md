@@ -79,7 +79,13 @@ You can either run it in its interactive mode (default), or specify the backup y
     
     # or
     ./backup.py --backup my_backup
+    
+    # or all:
+    ./backup.py --all
 
+You can configure a daily cron using `crontab -e`: add the following line to the cron file:
+
+    0 3 * * * /home/user/Simple-Backup-Script/backup.py --all
 
 ### Plugin-specific considerations
 ## PostgreSQL
