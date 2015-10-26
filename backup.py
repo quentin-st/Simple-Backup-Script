@@ -120,7 +120,7 @@ def rotate_backups(target, conn):
     now = datetime.datetime.now()
     # Loop over all files in the directory
     for file in conn.listdir(backup_dir):
-        if file.beginswith('backup-'):
+        if file.startswith('backup-'):
             fullpath = os.path.join(backup_dir, file)
 
             if conn.isfile(fullpath):
