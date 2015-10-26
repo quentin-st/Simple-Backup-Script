@@ -146,7 +146,7 @@ if len(BACKUPS) == 0:
 # Check command line arguments
 parser = argparse.ArgumentParser(description='Easily backup projects')
 parser.add_argument('--backup', default='ask_for_it')
-parser.add_argument('--all')
+parser.add_argument('-a', '--all', action='store_true')
 args = parser.parse_args()
 
 if args.backup == 'ask_for_it':
