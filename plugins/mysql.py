@@ -32,9 +32,9 @@ class MySQL:
             db_filename = database + '.sql'
 
             # Dump db
-            stdio.ppexec('mysqldump -u {user} -p"{password}" {database} | gzip > {file_path}'.format(
+            stdio.ppexec('mysqldump -u {user} -p\'{password}\' {database} | gzip > {file_path}'.format(
                 user=backup.get('database_user'),
-                password=backup.get('database_password').replace('"', '\\"').replace('!', '\\!'),
+                password=backup.get('database_password').replace("'", "\\'"),
                 database=database,
                 file_path=db_filename
             ))
