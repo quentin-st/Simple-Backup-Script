@@ -1,10 +1,18 @@
 # Simple-Backup-Script
 The purpose of this script is to offer a generic way to backup files or databases and send those backups to remote hosts.
 
+
 ## Prerequisites
 This script relies on the `pysftp` module:
 
     sudo pip install pysftp
+
+
+*Sidenote*: Please be aware that since we use Python 3, you have to make sure that `pip` installs the module for **Python 3**. If your system ships with Python 2 as the default interpreter, `pip install pysftp` will install `pysftp` for **Python 2**.
+In that case, you might want to install `pip3` and run :
+
+    sudo pip3 install pysftp
+
 
 ## How does it works?
 There are two customizable steps in this process:
@@ -15,6 +23,7 @@ All the logic behind this is contained in a plugin. If you cannot find a suitabl
 for the content you're trying to save, don't hesitate to create a pull request.
 
 A plugin is quite simple: all it does is to run commands to create the single file, and returns its complete file path.
+It also contains a `clean` function to delete temporary files created during its execution.
 
 ### Transfer
 Once we created the backup file, let's transfer it. See configuration below for more information.
@@ -36,14 +45,41 @@ Once we created the backup file, let's transfer it. See configuration below for 
 
 ## Configuration
 Copy or rename `config-sample.py` to get `config.py`.
-Its content looks like this:
+
+### Backup profiles
+You can add as many backup profiles as you wish.
 
     'my_backup': {              # That's the backup name: no special chars nor spaces please
         'profile': '',          # This is the name of the plugin
         
                                 # The whole backup node is sent to the plugin:
-        'database': 'myDb',     # here are some specific keys
+        'databases': ['myDb'],  # here are some specific keys
     }
+
+Check the `config-sample.py` for some information: it contains a sample configuration for each plugin.
+
+### Targets
+Each backup profile will then be sent to every target configured. Here's a sample:
+
+    {
+        'host': 'bkup.domain.com',  # Can either be a local/remote IP address
+        'port': 22,                 # Optional, default 22
+        'user': 'john',
+        'dir': '/home/john/backups/',
+        'days_to_keep': 7           # You can override global DAYS_TO_KEEP for each target
+    }
+
+**Important note**: the dir must only contain backups from this instance. Any other file could be deleted during backups rotation.
+
+## Usage
+You can either run it in its interactive mode (default), or specify the backup you want to achieve:
+
+    # Interactive mode:
+    ./backup.py
+    
+    # or
+    ./backup.py --backup my_backup
+
 
 ### Plugin-specific considerations
 ## PostgreSQL

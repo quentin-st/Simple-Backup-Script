@@ -1,3 +1,7 @@
+import tarfile
+import os
+import shutil
+
 from utils import stdio
 
 
@@ -5,31 +9,43 @@ def get_main_class():
     return PostgreSQL
 
 
-class PostgreSQL:
+class PostgreSQL():
     key_name = "postgresql"
     file_extension = "tar.gz"
 
+    def __init__(self):
+        self.temp_dir = ''
+
     def create_backup_file(self, backup):
-        # Create temporary directory
+        # Create temporary working directory
         tmp_dir = stdio.simple_exec('mktemp', '--directory')
+        self.temp_dir = tmp_dir
+
+        # Create tar file
+        saved_path = os.getcwd()
+        os.chdir(tmp_dir)
+
+        tar = tarfile.open('archive.tar.gz', 'w:gz')
 
         # Loop over databases
         for database in backup.get('databases'):
-            db_filepath = tmp_dir + '/' + database + '.sql'
+            db_filename = database + '.sql'
+
             # Dump db
             stdio.ppexec('pg_dump {database} -U {user} -h localhost -f {file_path} --no-password'.format(
                 database=database,
                 user=backup.get('database_user', database),
-                file_path=db_filepath
+                file_path=db_filename
             ))
 
-        # Create temp file
-        tmp_file = stdio.simple_exec('mktemp')
+            tar.add(os.path.basename(os.path.normpath(db_filename)))
 
-        # Compress temp directory
-        stdio.ppexec('cd {dir} && tar -cvzf {file} ./*'.format(
-            dir=tmp_dir,
-            file=tmp_file
-        ))
+        tar.close()
 
-        return tmp_file
+        os.chdir(saved_path)
+
+        return tmp_dir + '/archive.tar.gz'
+
+    def clean(self):
+        if self.temp_dir and os.path.isdir(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
