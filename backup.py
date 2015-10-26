@@ -146,6 +146,7 @@ if len(BACKUPS) == 0:
 # Check command line arguments
 parser = argparse.ArgumentParser(description='Easily backup projects')
 parser.add_argument('--backup', default='ask_for_it')
+parser.add_argument('--all')
 args = parser.parse_args()
 
 if args.backup == 'ask_for_it':
@@ -170,7 +171,15 @@ if args.backup == 'ask_for_it':
     else:
         print("I won't take that as an answer")
 
-else:  # Deploy project passed as argument
+elif args.all:
+    # Backup all profiles
+    for i, project in enumerate(BACKUPS):
+        print(CBOLD+LGREEN, "\n{} - Backing up {} ({})".format(i, project.get('name'), project.get('profile')), CRESET)
+
+        backup = BACKUPS[i]
+        do_backup(backup)
+
+else:  # Backup project passed as argument
     backup = get_backup(args.backup)
 
     if backup is None:
