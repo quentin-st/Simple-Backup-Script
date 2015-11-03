@@ -23,8 +23,12 @@ BACKUPS = [
         'name': 'my_backup3',
         'profile': 'filesystem',
 
-        'directories': ['/var/www/*']  # Will compress each subdirectory in a separate .tar.gz
-                                       # file inside a global .tar.gz file. Use '/var/www/' for single file
+        'directories': [
+            '/var/www/*',  # Will compress each subdirectory in a separate .tar.gz
+                           # file inside a global .tar.gz file. Use '/var/www/' for single file
+
+            '-/var/www/not-this/'  # Will exclude this directory
+        ]
     }
     #, { ... }
 ]
