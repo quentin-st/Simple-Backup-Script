@@ -29,16 +29,21 @@ class Filesystem:
         # Create tar file
         tar = tarfile.open('archive.tar.gz', 'w:gz')
 
-        # Pre-process directories list: [/var/www/*] must be replaced with [/var/www/dir1/, /var/www/dir2/],
+        # Pre-process directories list
         directories = []
         for directory in backup.get('directories'):
+            # [/var/www/*] must be replaced with [/var/www/dir1/, /var/www/dir2/],
             if directory.endswith('*'):
                 real_name = directory[:-1]
                 for name in os.listdir(real_name):
                     directories.append(real_name+name+'/')
+            # Handle "-/var/www/not-this/"
+            elif directory.startswith('-'):
+                dir_name = directory[1:]
+                if dir_name in directories:
+                    directories.remove(dir_name)
             else:
                 directories.append(directory)
-
 
         # Loop over directories
         for directory in directories:

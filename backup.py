@@ -130,7 +130,7 @@ def rotate_backups(target, conn):
     now = datetime.datetime.now()
     # Loop over all files in the directory
     for file in conn.listdir(backup_dir):
-        if file.beginswith('backup-'):
+        if file.startswith('backup-'):
             fullpath = os.path.join(backup_dir, file)
 
             if conn.isfile(fullpath):
@@ -156,9 +156,18 @@ if len(BACKUPS) == 0:
 # Check command line arguments
 parser = argparse.ArgumentParser(description='Easily backup projects')
 parser.add_argument('--backup', default='ask_for_it')
+parser.add_argument('-a', '--all', action='store_true')
 args = parser.parse_args()
 
-if args.backup == 'ask_for_it':
+if args.all:
+    # Backup all profiles
+    for i, project in enumerate(BACKUPS):
+        print(CBOLD+LGREEN, "\n{} - Backing up {} ({})".format(i, project.get('name'), project.get('profile')), CRESET)
+
+        backup = BACKUPS[i]
+        do_backup(backup)
+
+elif args.backup == 'ask_for_it':
     print("Please select a backup profile to execute")
     for i, project in enumerate(BACKUPS):
         print("\t[{}] {} ({})".format(str(i), project.get('name'), project.get('profile')))
@@ -180,7 +189,7 @@ if args.backup == 'ask_for_it':
     else:
         print("I won't take that as an answer")
 
-else:  # Deploy project passed as argument
+else:  # Backup project passed as argument
     backup = get_backup(args.backup)
 
     if backup is None:
