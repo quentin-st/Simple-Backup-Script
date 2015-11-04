@@ -8,6 +8,7 @@ import time
 import socket
 import datetime
 import pysftp
+import traceback
 
 import plugins
 from plugins import *
@@ -35,12 +36,21 @@ def send_file(backup, backup_filepath):
 
         # YESTERDAY YOU SAID TOMORROW
         # Init SFTP connection
-        conn = pysftp.Connection(
-            host=target.get('host'),
-            username=target.get('user'),
-            port=target.get('port', 22)
-        )
-        conn._transport.set_keepalive(30)
+        try:
+            conn = pysftp.Connection(
+                host=target.get('host'),
+                username=target.get('user'),
+                port=target.get('port', 22)
+            )
+            conn._transport.set_keepalive(30)
+        except (ConnectionException, SSHException):
+            print(CBOLD, "Unknown exception while connecting to host:", CRESET)
+            print(traceback.format_exc())
+            continue
+        except (CredentialException, AuthenticationException, PasswordRequiredException):
+            print(CBOLD, "Credentials or authentication exception while connecting to host:", CRESET)
+            print(traceback.format_exc())
+            continue
 
         # Create destination directory if necessary
         try:
