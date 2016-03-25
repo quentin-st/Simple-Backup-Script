@@ -124,12 +124,16 @@ def do_backup(backup):
     backup['file_extension'] = plugin.file_extension
 
     # Send it to the moon
-    send_file(backup, backup_filepath)
+    try:
+        send_file(backup, backup_filepath)
+    except Exception:
+        # Print exception (for output in logs)
+        print(traceback.format_exc())
+    finally:
+        # Delete the file
+        stdio.ppexec('rm {}'.format(backup_filepath))
 
-    # Delete the file
-    stdio.ppexec('rm {}'.format(backup_filepath))
-
-    plugin.clean()
+        plugin.clean()
 
     return
 
