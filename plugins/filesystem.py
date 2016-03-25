@@ -36,7 +36,8 @@ class Filesystem:
             if directory.endswith('*'):
                 real_name = directory[:-1]
                 for name in os.listdir(real_name):
-                    directories.append(real_name+name+'/')
+                    if os.path.isdir(os.path.join(real_name, name)):
+                        directories.append(os.path.join(real_name, name))
             # Handle "-/var/www/not-this/"
             elif directory.startswith('-'):
                 dir_name = directory[1:]
