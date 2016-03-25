@@ -35,6 +35,7 @@ BACKUPS = [
 
 TARGETS = [
     {
+        'type': 'remote',
         'host': 'bkup.domain.com',
         'port': 22,
         'user': 'john',

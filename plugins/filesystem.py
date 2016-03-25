@@ -64,7 +64,7 @@ class Filesystem:
 
         os.chdir(saved_path)
 
-        return tmp_dir + '/archive.tar.gz'
+        return os.path.join(tmp_dir, 'archive.tar.gz')
 
     def clean(self):
         if self.temp_dir and os.path.isdir(self.temp_dir):

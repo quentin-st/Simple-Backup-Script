@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import os
+import shutil
 import sys
 import inspect
 import argparse
@@ -31,44 +32,7 @@ def get_supported_backup_profiles():
 def send_file(backup, backup_filepath):
     # Send the file to each target
     for target in TARGETS:
-        target_dir = target.get('dir')
-
-        print(CBOLD+LGREEN, "\n==> Connecting to {}...".format(target.get('host')), CRESET)
-
-        # YESTERDAY YOU SAID TOMORROW
-        # Init SFTP connection
-        try:
-            conn = pysftp.Connection(
-                host=target.get('host'),
-                username=target.get('user'),
-                port=target.get('port', 22)
-            )
-            conn._transport.set_keepalive(30)
-        except (ConnectionException, SSHException):
-            print(CBOLD, "Unknown exception while connecting to host:", CRESET)
-            print(traceback.format_exc())
-            continue
-        except (CredentialException, AuthenticationException, PasswordRequiredException):
-            print(CBOLD, "Credentials or authentication exception while connecting to host:", CRESET)
-            print(traceback.format_exc())
-            continue
-
-        # Create destination directory if necessary
-        try:
-            # Try...
-            conn.chdir(target_dir)
-        except IOError:
-            # Create directories
-            current_dir = ''
-            for dir in target_dir.split('/'):
-                current_dir += dir + '/'
-                try:
-                    conn.chdir(current_dir)
-                except:
-                    print('Creating missing directory: ' + current_dir)
-                    conn.mkdir(current_dir)
-                    conn.chdir(current_dir)
-                    pass
+        type = target.get('type', 'remote')
 
         # Build destination filename
         dest_file_name = 'backup-{hostname}-{timestamp}-{backup_name}({backup_profile}).{file_extension}'.format(
@@ -79,16 +43,63 @@ def send_file(backup, backup_filepath):
             file_extension=backup.get('file_extension')
         )
 
-        print(CBOLD+LGREEN, "\n==> Starting transfer: {} => {}".format(backup_filepath, dest_file_name), CRESET)
+        target_dir = target.get('dir')
 
-        conn.put(backup_filepath, target_dir+dest_file_name)
+        if type == 'remote':
+            print(CBOLD+LGREEN, "\n==> Connecting to {}...".format(target.get('host')), CRESET)
 
-        print(CBOLD+LGREEN, "\n==> Transfer finished.", CRESET)
+            # YESTERDAY YOU SAID TOMORROW
+            # Init SFTP connection
+            try:
+                conn = pysftp.Connection(
+                    host=target.get('host'),
+                    username=target.get('user'),
+                    port=target.get('port', 22)
+                )
+                conn._transport.set_keepalive(30)
+            except (ConnectionException, SSHException):
+                print(CBOLD, "Unknown exception while connecting to host:", CRESET)
+                print(traceback.format_exc())
+                continue
+            except (CredentialException, AuthenticationException, PasswordRequiredException):
+                print(CBOLD, "Credentials or authentication exception while connecting to host:", CRESET)
+                print(traceback.format_exc())
+                continue
 
-        rotate_backups(target, conn)
+            # Create destination directory if necessary
+            try:
+                # Try...
+                conn.chdir(target_dir)
+            except IOError:
+                # Create directories
+                current_dir = ''
+                for dir in target_dir.split('/'):
+                    current_dir += dir + '/'
+                    try:
+                        conn.chdir(current_dir)
+                    except:
+                        print('Creating missing directory: ' + current_dir)
+                        conn.mkdir(current_dir)
+                        conn.chdir(current_dir)
+                        pass
 
-        conn.close()
+            print(CBOLD+LGREEN, "\n==> Starting transfer: {} => {}".format(backup_filepath, dest_file_name), CRESET)
 
+            # Uplod file
+            conn.put(backup_filepath, os.path.join(target_dir, dest_file_name))
+
+            print(CBOLD+LGREEN, "\n==> Transfer finished.", CRESET)
+
+            rotate_backups(target, conn)
+
+            conn.close()
+        elif type == 'local':
+            print(CBOLD + LGREEN, "\n==> Starting copy: {} => {}".format(backup_filepath, dest_file_name), CRESET)
+
+            if not os.path.exists(target_dir):
+                os.makedirs(target_dir)
+
+            shutil.copy(backup_filepath, os.path.join(target_dir, dest_file_name))
     return
 
 

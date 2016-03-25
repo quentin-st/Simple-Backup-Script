@@ -21,7 +21,7 @@ There are two customizable steps in this process:
 
 ### Backup
 This step copies the file or dumps the database and put everything in a single file.
-All the logic behind this is contained in a plugin. If you cannot find a suitable plugin (check /plugins)
+All the logic behind this is contained in a plugin. If you cannot find a suitable plugin (check [`/plugins`](/plugins) dir)
 for the content you're trying to save, don't hesitate to create a pull request.
 
 A plugin is quite simple: all it does is to run commands to create the single file, and returns its complete file path.
@@ -29,8 +29,10 @@ It also contains a `clean` function to delete temporary files created during its
 
 ### Transfer
 Once we created the backup file, let's transfer it. See configuration below for more information.
+It can either upload backup files to remote targets, or copy them in a local directory.
 
-**Note**: *SSH Public Key Authentication* **must** be set up or the script won't connect to your backup targets:
+#### Remote target configuration
+**Note**: *SSH Public Key Authentication* **must** be set up or the script won't connect to your remote backup targets:
 
 1. Generate SSH private (`~/.ssh/id_rsa`) & public (`~/.ssh/id_rsa.pub`) keys if not already done:
     
@@ -44,6 +46,7 @@ Once we created the backup file, let's transfer it. See configuration below for 
 
         ssh user@123.45.56.78
 
+> In both remote and target modes, you have to make sure that the user has the right to write in destination directory.
 
 ## Configuration
 Copy or rename `config-sample.py` to get `config.py`.
@@ -58,20 +61,29 @@ You can add as many backup profiles as you wish.
         'databases': ['myDb'],  # here are some specific keys
     }
 
-Check the `config-sample.py` for some information: it contains a sample configuration for each plugin.
+Check the [`config-sample.py` file](config-sample.py) for some examples: it contains a sample configuration for each plugin.
 
 ### Targets
-Each backup profile will then be sent to every target configured. Here's a sample:
+Each backup profile will then be sent/copied to every target configured. A target can either be `remote` or `local`. Here's a remote sample:
 
     {
-        'host': 'bkup.domain.com',  # Can either be a local/remote IP address
-        'port': 22,                 # Optional, default 22
-        'user': 'john',
-        'dir': '/home/john/backups/',
+        'type':     'remote',
+        'host':     'bkup.domain.com',  # Can either be a local/remote IP address
+        'port':     22,                 # Optional, default 22
+        'user':     'john',
+        'dir':      '/home/john/backups/',
         'days_to_keep': 7           # You can override global DAYS_TO_KEEP for each target
     }
 
-**Important note**: the dir must only contain backups from this instance. Any other file could be deleted during backups rotation.
+And here's a local sample:
+
+    {
+        'type':     'local',
+        'dir':      '/home/john/backups/',
+        'days_to_keep': 7           # You can override global DAYS_TO_KEEP for each target
+    }
+
+> **Important note**: the dir must only contain backups from this instance. Any other file could be deleted during backups rotation.
 
 ## Usage
 You can either run it in its interactive mode (default), or specify the backup you want to achieve:
@@ -89,8 +101,8 @@ You can configure a daily cron using `crontab -e`: add the following line to the
 
     0 0 * * * /home/user/Simple-Backup-Script/backup.py --all
 
-### Plugin-specific considerations
-## PostgreSQL
+## Plugin-specific considerations
+### PostgreSQL
 We have to be careful about authorizations. You'll have to create a `.pgpass` file in the cron user's home directory with the
 following syntax: `hostname:port:database:username:password`, for example:
 
