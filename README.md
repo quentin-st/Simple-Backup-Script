@@ -39,8 +39,12 @@ It can either upload backup files to remote targets, or copy them in a local dir
         ssh-keygen -t rsa
     
 2. Copy the public key on the remote server (replace `user` & `123.45.56.78`)
+    
+        ssh-copy-id -i ~/.ssh/id_rsa.pub user@123.45.56.78
 
-        cat ~/.ssh/id_rsa.pub | ssh user@123.45.56.78 "mkdir -p ~/.ssh && cat >>  ~/.ssh/authorized_keys"
+    If `~/.ssh/id_rsa.pub` is your default and only ssh key, you can ommit the `-i` option and simply use 
+    
+        ssh-copy-id user@123.45.56.78
 
 3. Successfully connect without any password
 
