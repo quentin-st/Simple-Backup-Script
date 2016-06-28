@@ -160,56 +160,59 @@ def rotate_backups(target, conn):
                     ), CRESET)
                     conn.unlink(file)
 
-
     return
 
 
-# Ask for backup to run
-if len(BACKUPS) == 0:
-    print(CBOLD+LGREEN, "\nPlease configure backup projects in backup.py", CRESET)
-    sys.exit(1)
-
-# Check command line arguments
-parser = argparse.ArgumentParser(description='Easily backup projects')
-parser.add_argument('--backup', default='ask_for_it')
-parser.add_argument('-a', '--all', action='store_true')
-args = parser.parse_args()
-
-if args.all:
-    # Backup all profiles
-    for i, project in enumerate(BACKUPS):
-        print(CBOLD+LGREEN, "\n{} - Backing up {} ({})".format(i, project.get('name'), project.get('profile')), CRESET)
-
-        backup = BACKUPS[i]
-        do_backup(backup)
-
-elif args.backup == 'ask_for_it':
-    print("Please select a backup profile to execute")
-    for i, project in enumerate(BACKUPS):
-        print("\t[{}] {} ({})".format(str(i), project.get('name'), project.get('profile')))
-
-    backup_index = -1
-    is_valid = 0
-    while not is_valid:
-        try:
-            backup_index = int(input("? "))
-            is_valid = 1
-        except ValueError:
-            print("Not a valid integer.")
-
-    if 0 <= backup_index < len(BACKUPS):
-        # Here goes the thing
-        backup = BACKUPS[backup_index]
-
-        do_backup(backup)
-    else:
-        print("I won't take that as an answer")
-
-else:  # Backup project passed as argument
-    backup = get_backup(args.backup)
-
-    if backup is None:
-        print("This backup does not exists, or there may be several backups with this name")
+try:
+    # Ask for backup to run
+    if len(BACKUPS) == 0:
+        print(CBOLD+LGREEN, "\nPlease configure backup projects in backup.py", CRESET)
         sys.exit(1)
-    else:
-        do_backup(backup)
+
+    # Check command line arguments
+    parser = argparse.ArgumentParser(description='Easily backup projects')
+    parser.add_argument('--backup', default='ask_for_it')
+    parser.add_argument('-a', '--all', action='store_true')
+    args = parser.parse_args()
+
+    if args.all:
+        # Backup all profiles
+        for i, project in enumerate(BACKUPS):
+            print(CBOLD+LGREEN, "\n{} - Backing up {} ({})".format(i, project.get('name'), project.get('profile')), CRESET)
+
+            backup = BACKUPS[i]
+            do_backup(backup)
+
+    elif args.backup == 'ask_for_it':
+        print("Please select a backup profile to execute")
+        for i, project in enumerate(BACKUPS):
+            print("\t[{}] {} ({})".format(str(i), project.get('name'), project.get('profile')))
+
+        backup_index = -1
+        is_valid = 0
+        while not is_valid:
+            try:
+                backup_index = int(input("? "))
+                is_valid = 1
+            except ValueError:
+                print("Not a valid integer.")
+
+        if 0 <= backup_index < len(BACKUPS):
+            # Here goes the thing
+            backup = BACKUPS[backup_index]
+
+            do_backup(backup)
+        else:
+            print("I won't take that as an answer")
+
+    else:  # Backup project passed as argument
+        backup = get_backup(args.backup)
+
+        if backup is None:
+            print("This backup does not exists, or there may be several backups with this name")
+            sys.exit(1)
+        else:
+            do_backup(backup)
+except KeyboardInterrupt:
+    print('\n^C signal caught, exiting')
+    sys.exit(1)
