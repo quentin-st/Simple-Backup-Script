@@ -57,11 +57,11 @@ def send_file(backup, backup_filepath):
                     port=target.get('port', 22)
                 )
                 conn._transport.set_keepalive(30)
-            except (ConnectionException, SSHException):
+            except (pysftp.ConnectionException, pysftp.SSHException):
                 print(CBOLD, "Unknown exception while connecting to host:", CRESET)
                 print(traceback.format_exc())
                 continue
-            except (CredentialException, AuthenticationException, PasswordRequiredException):
+            except (pysftp.CredentialException, pysftp.AuthenticationException):
                 print(CBOLD, "Credentials or authentication exception while connecting to host:", CRESET)
                 print(traceback.format_exc())
                 continue
@@ -85,7 +85,7 @@ def send_file(backup, backup_filepath):
 
             print(CBOLD+LGREEN, "\n==> Starting transfer: {} => {}".format(backup_filepath, dest_file_name), CRESET)
 
-            # Uplod file
+            # Upload file
             conn.put(backup_filepath, os.path.join(target_dir, dest_file_name))
 
             print(CBOLD+LGREEN, "\n==> Transfer finished.", CRESET)
