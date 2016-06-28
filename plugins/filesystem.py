@@ -40,7 +40,7 @@ class Filesystem:
                         directories.append(os.path.join(real_name, name))
             # Handle "-/var/www/not-this/"
             elif directory.startswith('-'):
-                dir_name = directory[1:]
+                dir_name = directory[1:].rstrip('/')
                 if dir_name in directories:
                     directories.remove(dir_name)
             else:
