@@ -10,13 +10,12 @@ import socket
 import datetime
 import pysftp
 import traceback
-import requests
 
 import plugins
 from plugins import *
 from config import BACKUPS, TARGETS, DAYS_TO_KEEP
 from utils import stdio
-from utils.stdio import CRESET, CBOLD, LGREEN
+from utils.stdio import CRESET, CBOLD, LGREEN, CDIM, LWARN
 
 
 # Functions
@@ -171,11 +170,26 @@ try:
 
     # Check command line arguments
     parser = argparse.ArgumentParser(description='Easily backup projects')
+    parser.add_argument('--self-update', action='store_true', dest='self_update')
     parser.add_argument('--backup', default='ask_for_it')
     parser.add_argument('-a', '--all', action='store_true')
     args = parser.parse_args()
 
-    if args.all:
+    if args.self_update:
+        # cd to own directory
+        self_dir = os.path.dirname(os.path.realpath(__file__))
+
+        if not os.path.isdir(os.path.join(self_dir, '.git')):
+            print(CDIM+LWARN, "Cannot self-update: missing .git directory", CRESET)
+            sys.exit(1)
+
+        os.chdir(self_dir)
+        os.system("git pull")
+
+        print()
+        print(LGREEN, "Updated to the latest version", CRESET)
+
+    elif args.all:
         # Backup all profiles
         for i, project in enumerate(BACKUPS):
             print(CBOLD+LGREEN, "\n{} - Backing up {} ({})".format(i, project.get('name'), project.get('profile')), CRESET)
