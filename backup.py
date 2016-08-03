@@ -44,7 +44,7 @@ def load_config():
 
     config['days_to_keep'] = json_config['days_to_keep']
     config['backups'] = json_config['backups']
-    config['targets'] = json_config['target']
+    config['targets'] = json_config['targets']
 
 
 def get_supported_backup_profiles():
