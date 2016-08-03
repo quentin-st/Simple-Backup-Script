@@ -1,6 +1,5 @@
 # Simple-Backup-Script
-The purpose of this script is to offer a generic way to backup files or databases and send those backups to remote hosts.
-
+The purpose of this script is to offer a generic way to backup files or databases or whatever and send those backups to remote hosts.
 
 ## Prerequisites
 This script relies on the `pysftp` and `requests`  modules:
@@ -19,20 +18,19 @@ sudo pip3 install requests
 ```
 
 
-## How does it works?
+## How does it work?
 There are two customizable steps in this process:
 
 ### Backup
-This step copies the file or dumps the database and put everything in a single file.
-All the logic behind this is contained in a plugin. If you cannot find a suitable plugin (check [`/plugins`](/plugins) dir)
+This step copies files or dumps databases and puts everything in a single .tar.gz file.
+All the logic behind this is contained within a plugin. If you cannot find a suitable plugin (check [`/plugins`](/plugins) dir)
 for the content you're trying to save, don't hesitate to create a pull request.
 
-A plugin is quite simple: all it does is to run commands to create the single file, and returns its complete file path.
+A plugin is quite simple: all it does is to run commands to create the single file, and return its complete file path.
 It also contains a `clean` function to delete temporary files created during its execution.
 
 ### Transfer
-Once we created the backup file, let's transfer it. See configuration below for more information.
-It can either upload backup files to remote targets, or copy them in a local directory.
+Once everything is ready, let's upload the files to each remote. We can either upload backup files to remote targets, or copy them in a local directory.
 
 #### Remote target configuration
 **Note**: *SSH Public Key Authentication* **must** be set up or the script won't connect to your remote backup targets:
@@ -49,7 +47,7 @@ It can either upload backup files to remote targets, or copy them in a local dir
     ssh-copy-id -i ~/.ssh/id_rsa.pub user@123.45.56.78
     ```
 
-    If `~/.ssh/id_rsa.pub` is your default and only ssh key, you can ommit the `-i` option and simply use
+    If `~/.ssh/id_rsa.pub` is your default and only ssh key, you can omit the `-i` option and simply use
 
     ```bash
     ssh-copy-id user@123.45.56.78
@@ -71,12 +69,12 @@ Copy or rename `config-sample.json` to get `config.json`.
 ### Backup profiles
 You can add as many backup profiles as you wish.
 
-```json
-"my_backup": {              # That's the backup name: no special chars nor spaces please
-    "profile": "",          # This is the name of the plugin
+```js
+"my_backup": {              // That's the backup name: no special chars nor spaces please
+    "profile": "",          // That's the name of the plugin ("mysql", "filesystem" or whatever)
 
-                            # The whole backup node is sent to the plugin:
-    "databases": ["myDb"],  # here are some specific keys
+                            // The whole backup node is sent to the plugin:
+    "databases": ["myDb"],  // here are some specific keys
 }
 ```
 
@@ -88,11 +86,11 @@ Each backup profile will then be sent/copied to every target configured. A targe
 ```js
 {
     "type":     "remote",
-    "host":     "bkup.domain.com",  # Can either be a local/remote IP address
-    "port":     22,                 # Optional, default 22
+    "host":     "bkup.domain.com",  // Can either be a local/remote IP address
+    "port":     22,                 // Optional, default 22
     "user":     "john",
     "dir":      "/home/john/backups/",
-    "days_to_keep": 7               # You can override global DAYS_TO_KEEP for each target
+    "days_to_keep": 7               // You can override global DAYS_TO_KEEP for each target
 }
 ```
 
@@ -102,14 +100,14 @@ And here's a local sample:
 {
     "type":     "local",
     "dir":      "/home/john/backups/",
-    "days_to_keep": 7               # You can override global DAYS_TO_KEEP for each target
+    "days_to_keep": 7               // You can override global DAYS_TO_KEEP for each target
 }
 ```
 
-> **Important note**: the dir must only contain backups from this instance. Any other file could be deleted during backups rotation.
+> **Important note**: the `"dir"` directory must only contain backups from this instance. Any other file could be deleted during backups rotation.
 
 ## Usage
-You can either run it in its interactive mode (default), or specify the backup you want to achieve:
+You can either run it in its interactive mode (default), or specify the backup profile you want to run:
 
 ```bash
 # Interactive mode:
