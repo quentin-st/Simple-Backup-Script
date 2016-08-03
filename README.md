@@ -85,24 +85,24 @@ Check [`config-sample.json`](config-sample.json) for some examples: it contains 
 ### Targets
 Each backup profile will then be sent/copied to every target configured. A target can either be `remote` or `local`. Here's a remote sample:
 
-```json
+```js
 {
     "type":     "remote",
     "host":     "bkup.domain.com",  # Can either be a local/remote IP address
     "port":     22,                 # Optional, default 22
     "user":     "john",
     "dir":      "/home/john/backups/",
-    "days_to_keep": 7           # You can override global DAYS_TO_KEEP for each target
+    "days_to_keep": 7               # You can override global DAYS_TO_KEEP for each target
 }
 ```
 
 And here's a local sample:
 
-```json
+```js
 {
     "type":     "local",
     "dir":      "/home/john/backups/",
-    "days_to_keep": 7           # You can override global DAYS_TO_KEEP for each target
+    "days_to_keep": 7               # You can override global DAYS_TO_KEEP for each target
 }
 ```
 
