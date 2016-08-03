@@ -10,15 +10,42 @@ import socket
 import datetime
 import pysftp
 import traceback
+import json
 
 import plugins
 from plugins import *
-from config import BACKUPS, TARGETS, DAYS_TO_KEEP
 from utils import stdio
 from utils.stdio import CRESET, CBOLD, LGREEN, CDIM, LWARN
 
+config = {
+    'days_to_keep': 15,
+    'backups': [],
+    'targets': []
+}
+
 
 # Functions
+def load_config():
+    config_filename = 'config.json'
+    config_filename_old = 'config.py'
+
+    # Load config
+    if not os.path.isfile(config_filename):
+        if os.path.isfile(config_filename_old):
+            print(CBOLD + LWARN, '\n{} is deprecated. Please use --migrate to generate {}'.format(
+                config_filename_old, config_filename))
+        else:
+            print(CBOLD + LWARN, '\nCould not find configuration file {}'.format(config_filename))
+
+        sys.exit(1)
+
+    with open(config_filename, 'r') as config_file:
+        json_config = json.load(config_file)
+
+    config['days_to_keep'] = json_config['days_to_keep']
+    config['backups'] = json_config['backups']
+    config['targets'] = json_config['target']
+
 
 def get_supported_backup_profiles():
     plugins_list = {}
@@ -30,7 +57,7 @@ def get_supported_backup_profiles():
 
 def send_file(backup, backup_filepath):
     # Send the file to each target
-    for target in TARGETS:
+    for target in config['targets']:
         type = target.get('type', 'remote')
 
         # Build destination filename
@@ -112,7 +139,7 @@ def send_file(backup, backup_filepath):
 
 
 def get_backup(backup_name):
-    candidates = [b for b in BACKUPS if b.get('name') == backup_name]
+    candidates = [b for b in config['backups'] if b.get('name') == backup_name]
     return candidates[0] if len(candidates) == 1 else None
 
 
@@ -135,7 +162,7 @@ def do_backup(backup):
     try:
         send_file(backup, backup_filepath)
     except Exception:
-        # Print exception (for output in logs)
+        # Print exception (for output in logs)
         print(traceback.format_exc())
     finally:
         # Delete the file
@@ -162,7 +189,7 @@ def rotate_backups(target, conn):
                 createtime = datetime.datetime.fromtimestamp(timestamp)
                 delta = now - createtime
 
-                if delta.days > target.get('days_to_keep', DAYS_TO_KEEP):
+                if delta.days > target.get('days_to_keep', config['days_to_keep']):
                     print(CBOLD+LGREEN, "\n==> Deleting backup file {file} ({days} days old)".format(
                         file=file, days=delta
                     ), CRESET)
@@ -172,11 +199,6 @@ def rotate_backups(target, conn):
 
 
 try:
-    # Ask for backup to run
-    if len(BACKUPS) == 0:
-        print(CBOLD+LGREEN, "\nPlease configure backup projects in backup.py", CRESET)
-        sys.exit(1)
-
     # Check command line arguments
     parser = argparse.ArgumentParser(description='Easily backup projects')
     parser.add_argument('--self-update', action='store_true', dest='self_update')
@@ -203,44 +225,52 @@ try:
         print()
         print(LGREEN, "Updated to the latest version", CRESET)
 
-    elif args.all:
-        # Backup all profiles
-        for i, project in enumerate(BACKUPS):
-            print(CBOLD+LGREEN, "\n{} - Backing up {} ({})".format(i, project.get('name'), project.get('profile')), CRESET)
+    else:
+        load_config()
 
-            backup = BACKUPS[i]
-            do_backup(backup)
-
-    elif args.backup == 'ask_for_it':
-        print("Please select a backup profile to execute")
-        for i, project in enumerate(BACKUPS):
-            print("\t[{}] {} ({})".format(str(i), project.get('name'), project.get('profile')))
-
-        backup_index = -1
-        is_valid = 0
-        while not is_valid:
-            try:
-                backup_index = int(input("? "))
-                is_valid = 1
-            except ValueError:
-                print("Not a valid integer.")
-
-        if 0 <= backup_index < len(BACKUPS):
-            # Here goes the thing
-            backup = BACKUPS[backup_index]
-
-            do_backup(backup)
-        else:
-            print("I won't take that as an answer")
-
-    else:  # Backup project passed as argument
-        backup = get_backup(args.backup)
-
-        if backup is None:
-            print("This backup does not exists, or there may be several backups with this name")
+        # Ask for backup to run
+        if len(config['backups']) == 0:
+            print(CBOLD + LGREEN, "\nPlease configure backup projects in backup.py", CRESET)
             sys.exit(1)
-        else:
-            do_backup(backup)
+
+        if args.all:
+            # Backup all profiles
+            for i, project in enumerate(config['backups']):
+                print(CBOLD+LGREEN, "\n{} - Backing up {} ({})".format(i, project.get('name'), project.get('profile')), CRESET)
+
+                backup = config['backups'][i]
+                do_backup(backup)
+
+        elif args.backup == 'ask_for_it':
+            print("Please select a backup profile to execute")
+            for i, project in enumerate(config['backups']):
+                print("\t[{}] {} ({})".format(str(i), project.get('name'), project.get('profile')))
+
+            backup_index = -1
+            is_valid = 0
+            while not is_valid:
+                try:
+                    backup_index = int(input("? "))
+                    is_valid = 1
+                except ValueError:
+                    print("Not a valid integer.")
+
+            if 0 <= backup_index < len(config['backups']):
+                # Here goes the thing
+                backup = config['backups'][backup_index]
+
+                do_backup(backup)
+            else:
+                print("I won't take that as an answer")
+
+        else:  # Backup project passed as argument
+            backup = get_backup(args.backup)
+
+            if backup is None:
+                print("This backup does not exist, or there may be several backups with this name")
+                sys.exit(1)
+            else:
+                do_backup(backup)
 except KeyboardInterrupt:
     print('\n^C signal caught, exiting')
     sys.exit(1)
