@@ -45,16 +45,25 @@ def send_file(backup, backup_filepath):
         target_dir = target.get('dir')
 
         if type == 'remote':
-            print(CBOLD+LGREEN, "\n==> Connecting to {}...".format(target.get('host')), CRESET)
+            user = target.get('user')
+            host = target.get('host')
+            port = target.get('port', 22)
 
-            # YESTERDAY YOU SAID TOMORROW
+            print(CBOLD+LGREEN, "\n==> Connecting to {}@{}:{}...".format(user, host, port), CRESET)
+
             # Init SFTP connection
             try:
+                cnopts = pysftp.CnOpts()
+                if target.get('disable_hostkey_checking', False):
+                    cnopts.hostkeys = None
+
                 conn = pysftp.Connection(
-                    host=target.get('host'),
+                    host=host,
                     username=target.get('user'),
-                    port=target.get('port', 22)
+                    port=port,
+                    cnopts=cnopts
                 )
+
                 conn._transport.set_keepalive(30)
             except (pysftp.ConnectionException, pysftp.SSHException):
                 print(CBOLD, "Unknown exception while connecting to host:", CRESET)
