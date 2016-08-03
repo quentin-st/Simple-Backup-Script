@@ -14,7 +14,6 @@ import json
 
 import plugins
 from plugins import *
-from utils import stdio
 from utils.stdio import CRESET, CBOLD, LGREEN, CDIM, LWARN
 
 config = {
@@ -53,6 +52,11 @@ def get_supported_backup_profiles():
         # Get class from this member
         plugins_list[plugin_pkg_name] = plugin_pkg.get_main_class()
     return plugins_list
+
+
+def print_upload_progress(transferred, total):
+    workdone = transferred/total
+    print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(workdone * 50), workdone * 100), end="", flush=True)
 
 
 def send_file(backup, backup_filepath):
@@ -108,12 +112,12 @@ def send_file(backup, backup_filepath):
             except IOError:
                 # Create directories
                 current_dir = ''
-                for dir in target_dir.split('/'):
-                    current_dir += dir + '/'
+                for directory in target_dir.split('/'):
+                    current_dir = os.path.join(current_dir, directory)
                     try:
                         conn.chdir(current_dir)
                     except:
-                        print('Creating missing directory: ' + current_dir)
+                        print('Creating missing directory {}'.format(current_dir))
                         conn.mkdir(current_dir)
                         conn.chdir(current_dir)
                         pass
@@ -121,7 +125,7 @@ def send_file(backup, backup_filepath):
             print(CBOLD+LGREEN, "\n==> Starting transfer: {} => {}".format(backup_filepath, dest_file_name), CRESET)
 
             # Upload file
-            conn.put(backup_filepath, os.path.join(target_dir, dest_file_name))
+            conn.put(backup_filepath, os.path.join(target_dir, dest_file_name), callback=print_upload_progress)
 
             print(CBOLD+LGREEN, "\n==> Transfer finished.", CRESET)
 

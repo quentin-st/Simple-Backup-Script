@@ -54,7 +54,7 @@ class Filesystem:
 
             # Create single tar.gz file for this dir
             singletar_filename = dir_name + ".tar.gz"
-            print(CBOLD+LGREEN, "    Creating " + singletar_filename, CRESET)
+            print("    + " + singletar_filename)
 
             single_tar = tarfile.open(singletar_filename, 'w:gz')
             single_tar.add(directory, arcname=dir_name)
