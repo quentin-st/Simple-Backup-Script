@@ -1,0 +1,42 @@
+{
+    "days_to_keep": 15,
+
+    "backups": [
+        {
+            "name": "my_postgresql_backup",
+            "profile": "postgresql",
+
+            "databases": ["myDb"],
+            "database_user": ""
+        },
+        {
+            "name": "my_mysql_backup",
+            "profile": "mysql",
+
+            "databases": ["myDb1", "mydb2"],
+            "database_user": "",
+            "database_password": ""
+        },
+        {
+            "name": "my_filesystem_backup",
+            "profile": "filesystem",
+
+            "directories": [
+                "/var/www/*",
+                "-/var/www/not-this",
+                "-/var/www/not-this-either"
+            ]
+        }
+    ],
+
+    "targets": [
+        {
+            "type": "remote",
+            "host": "bkup.domain.com",
+            "port": 22,
+            "user": "john",
+            "dir": "/home/john/backups/",
+            "days_to_keep": 7
+        }
+    ]
+}
