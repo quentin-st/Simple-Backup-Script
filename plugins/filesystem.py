@@ -1,8 +1,8 @@
 import tarfile
 import os
 import shutil
+import tempfile
 
-from utils import stdio
 from utils.stdio import CRESET, CBOLD, LGREEN, LWARN
 
 
@@ -19,7 +19,7 @@ class Filesystem:
 
     def create_backup_file(self, backup):
         # Create temporary working directory
-        tmp_dir = stdio.simple_exec('mktemp',  '--directory')
+        tmp_dir = tempfile.mkdtemp()
         self.temp_dir = tmp_dir
 
         # cd to temp dir
@@ -44,7 +44,7 @@ class Filesystem:
                 if dir_name in directories:
                     directories.remove(dir_name)
                 else:
-                    print(LWARN, "\nUseless directory exclude pattern {}: directory wasn't selected at first".format(dir_name))
+                    print(LWARN, "    Useless directory exclude pattern {}: directory wasn't selected at first".format(dir_name))
             else:
                 directories.append(directory)
 
@@ -54,7 +54,7 @@ class Filesystem:
 
             # Create single tar.gz file for this dir
             singletar_filename = dir_name + ".tar.gz"
-            print(CBOLD+LGREEN, "\nCreating " + singletar_filename, CRESET)
+            print(CBOLD+LGREEN, "    Creating " + singletar_filename, CRESET)
 
             single_tar = tarfile.open(singletar_filename, 'w:gz')
             single_tar.add(directory, arcname=dir_name)

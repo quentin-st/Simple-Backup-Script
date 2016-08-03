@@ -1,6 +1,7 @@
 import tarfile
 import os
 import shutil
+import tempfile
 
 from utils import stdio
 
@@ -18,7 +19,7 @@ class PostgreSQL():
 
     def create_backup_file(self, backup):
         # Create temporary working directory
-        tmp_dir = stdio.simple_exec('mktemp', '--directory')
+        tmp_dir = tempfile.mkdtemp()
         self.temp_dir = tmp_dir
 
         # Create tar file
