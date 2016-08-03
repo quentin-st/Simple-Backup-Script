@@ -182,9 +182,14 @@ try:
     parser.add_argument('--self-update', action='store_true', dest='self_update')
     parser.add_argument('--backup', default='ask_for_it')
     parser.add_argument('-a', '--all', action='store_true')
+    parser.add_argument('--migrate', action='store_true')
     args = parser.parse_args()
 
-    if args.self_update:
+    if args.migrate:
+        from utils.migrator import migrate
+        migrate()
+
+    elif args.self_update:
         # cd to own directory
         self_dir = os.path.dirname(os.path.realpath(__file__))
 
