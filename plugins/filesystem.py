@@ -3,7 +3,7 @@ import os
 import shutil
 
 from utils import stdio
-from utils.stdio import CRESET, CBOLD, LGREEN
+from utils.stdio import CRESET, CBOLD, LGREEN, LWARN
 
 
 def get_main_class():
@@ -43,6 +43,8 @@ class Filesystem:
                 dir_name = directory[1:].rstrip('/')
                 if dir_name in directories:
                     directories.remove(dir_name)
+                else:
+                    print(LWARN, "\nUseless directory exclude pattern {}: directory wasn't selected at first".format(dir_name))
             else:
                 directories.append(directory)
 
