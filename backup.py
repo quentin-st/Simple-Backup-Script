@@ -166,7 +166,8 @@ def do_backup(backup):
         print(traceback.format_exc())
     finally:
         # Delete the file
-        stdio.ppexec('rm {}'.format(backup_filepath))
+        print(CDIM, "Deleting {}".format(backup_filepath), CRESET)
+        os.remove(backup_filepath)
 
         plugin.clean()
 
