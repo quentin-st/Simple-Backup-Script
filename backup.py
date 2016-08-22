@@ -41,9 +41,10 @@ def load_config():
     with open(config_filename, 'r') as config_file:
         json_config = json.load(config_file)
 
-    config['days_to_keep'] = json_config['days_to_keep']
-    config['backups'] = json_config['backups']
-    config['targets'] = json_config['targets']
+    config['days_to_keep'] = json_config.get('days_to_keep', config['days_to_keep'])
+    config['alert_emails'] = json_config.get('alert_emails')
+    config['backups'] = json_config.get('backups', [])
+    config['targets'] = json_config.get('targets', [])
 
 
 def get_supported_backup_profiles():
@@ -168,6 +169,16 @@ def do_backup(backup):
     except Exception:
         # Print exception (for output in logs)
         print(traceback.format_exc())
+
+        email_addresses = config.get('alert_emails', None)
+        if email_addresses is not None:
+            for address in [a for a in email_addresses if a]:
+                if address:
+                    send_mail(
+                        address,
+                        'Simple-Backup-Script: backup "{}" failed'.format(backup.get('name')),
+                        traceback.format_exc()
+                    )
     finally:
         # Delete the file
         print(CDIM, "Deleting {}".format(backup_filepath), CRESET)
@@ -203,6 +214,19 @@ def rotate_backups(target, conn):
     return
 
 
+# Inspired by http://stackoverflow.com/a/27874213/1474079
+def send_mail(recipient, subject, body):
+    import subprocess
+
+    try:
+        process = subprocess.Popen(['mail', '-s', subject, recipient], stdin=subprocess.PIPE)
+        process.communicate(body)
+        return True
+    except Exception as error:
+        print(error)
+        return False
+
+
 try:
     # Check command line arguments
     parser = argparse.ArgumentParser(description='Easily backup projects')
@@ -210,6 +234,7 @@ try:
     parser.add_argument('--backup', default='ask_for_it')
     parser.add_argument('-a', '--all', action='store_true')
     parser.add_argument('--migrate', action='store_true')
+    parser.add_argument('--test-mails', action='store_true', dest='test_mails')
     args = parser.parse_args()
 
     if args.migrate:
@@ -230,6 +255,25 @@ try:
         print()
         print(LGREEN, "Updated to the latest version", CRESET)
 
+    elif args.test_mails:
+        load_config()
+
+        email_addresses = config['alert_emails']
+        mail_sent = False
+        if email_addresses:
+            for address in [a for a in email_addresses if a]:
+                if address:
+                    if send_mail(address, 'Simple-Backup-Script: test e-mail', ''):
+                        mail_sent = True
+                        print('Test mail sent to {}'.format(address))
+                    else:
+                        print('Could not send mail to {}'.format(address))
+
+            if not mail_sent:
+                print('No mail could be sent.')
+        else:
+            print('"alert_emails" is null or empty.')
+            sys.exit(1)
     else:
         load_config()
 

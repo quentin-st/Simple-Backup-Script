@@ -66,6 +66,17 @@ Copy or rename `config-sample.json` to get `config.json`.
 
 > Note: we switched from `config.py` to `config.json`. Use `backup.py --migrate` to create `config.json`.
 
+### Emails
+You can receive an e-mail when a backups fails for whatsoever reason. Just customize the `alert_emails` array
+with one or more email addresses. A null, empty array (`[]`) or single empty string array value (`[""]`) will disable
+this feature.
+
+```js
+"alert_email": ["john@doe.com", "it@doe.com", "accounting@doe.com"],
+```
+
+Once done, run the `./backup.py --test-mails` command to check if it works fine.
+
 ### Backup profiles
 You can add as many backup profiles as you wish.
 
