@@ -21,20 +21,19 @@ config = {
     'backups': [],
     'targets': []
 }
+config_filename = 'config.json'
+config_filename_old = 'config.py'
 
 
 # Functions
 def load_config():
-    config_filename = 'config.json'
-    config_filename_old = 'config.py'
-
     # Load config
     if not os.path.isfile(config_filename):
         if os.path.isfile(config_filename_old):
             print(CBOLD + LWARN, '\n{} is deprecated. Please use --migrate to generate {}'.format(
-                config_filename_old, config_filename))
+                config_filename_old, config_filename), CRESET)
         else:
-            print(CBOLD + LWARN, '\nCould not find configuration file {}'.format(config_filename))
+            print(CBOLD + LWARN, '\nCould not find configuration file {}'.format(config_filename), CRESET)
 
         sys.exit(1)
 
@@ -235,6 +234,7 @@ try:
     parser.add_argument('-a', '--all', action='store_true')
     parser.add_argument('--migrate', action='store_true')
     parser.add_argument('--test-mails', action='store_true', dest='test_mails')
+    parser.add_argument('--test-config', action='store_true', dest='test_config')
     args = parser.parse_args()
 
     if args.migrate:
@@ -274,6 +274,30 @@ try:
         else:
             print('"alert_emails" is null or empty.')
             sys.exit(1)
+
+    elif args.test_config:
+        print('Opening {}'.format(config_filename))
+
+        try:
+            load_config()
+
+            if len(config['backups']) == 0:
+                print(LWARN, 'Error: there a no configured backup profile', CRESET)
+                sys.exit(1)
+
+            if len(config['targets']) == 0:
+                print(LWARN, 'Error: there are no configured targets', CRESET)
+                sys.exit(1)
+
+            print(CBOLD + LGREEN, '{} successfully parsed:'.format(config_filename), CRESET)
+            print('  - Default days_to_keep: {}'.format(config['days_to_keep']))
+            print('  - Alert emails: {}'.format(config['alert_emails']))
+            print('  - {} backup profile(s)'.format(len(config['backups'])))
+            print('  - {} backup target(s)'.format(len(config['targets'])))
+        except Exception:
+            print('Could not parse configuration:')
+            print(traceback.format_exc())
+
     else:
         load_config()
 

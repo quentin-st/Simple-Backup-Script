@@ -117,6 +117,8 @@ And here's a local sample:
 
 > **Important note**: the `"dir"` directory must only contain backups from this instance. Any other file could be deleted during backups rotation.
 
+Once done, run the `./backup.py --test-config` command to check if everything's OK.
+
 ## Usage
 You can either run it in its interactive mode (default), or specify the backup profile you want to run:
 
