@@ -99,10 +99,12 @@ def send_file(backup, backup_filepath):
             except (pysftp.ConnectionException, pysftp.SSHException):
                 print(CBOLD, "Unknown exception while connecting to host:", CRESET)
                 print(traceback.format_exc())
+                send_mail_on_error(backup, traceback)
                 continue
             except (pysftp.CredentialException, pysftp.AuthenticationException):
                 print(CBOLD, "Credentials or authentication exception while connecting to host:", CRESET)
                 print(traceback.format_exc())
+                send_mail_on_error(backup, traceback)
                 continue
 
             # Create destination directory if necessary
@@ -169,15 +171,7 @@ def do_backup(backup):
         # Print exception (for output in logs)
         print(traceback.format_exc())
 
-        email_addresses = config.get('alert_emails', None)
-        if email_addresses is not None:
-            for address in [a for a in email_addresses if a]:
-                if address:
-                    send_mail(
-                        address,
-                        'Simple-Backup-Script: backup "{}" failed'.format(backup.get('name')),
-                        traceback.format_exc()
-                    )
+        send_mail_on_error(backup, traceback)
     finally:
         # Delete the file
         print(CDIM, "Deleting {}".format(backup_filepath), CRESET)
@@ -211,6 +205,18 @@ def rotate_backups(target, conn):
                     conn.unlink(file)
 
     return
+
+
+def send_mail_on_error(backup, traceback):
+    email_addresses = config.get('alert_emails', None)
+    if email_addresses is not None:
+        for address in [a for a in email_addresses if a]:
+            if address:
+                send_mail(
+                    address,
+                    'Simple-Backup-Script: backup "{}" failed'.format(backup.get('name')),
+                    traceback.format_exc()
+                )
 
 
 # Inspired by http://stackoverflow.com/a/27874213/1474079
