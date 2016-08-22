@@ -225,7 +225,7 @@ def send_mail(recipient, subject, body):
 
     try:
         process = subprocess.Popen(['mail', '-s', subject, recipient], stdin=subprocess.PIPE)
-        process.communicate(body)
+        process.communicate(input=bytes(body, 'UTF-8'))
         return True
     except Exception as error:
         print(error)
