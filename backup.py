@@ -301,7 +301,7 @@ try:
             print('  - {} backup profile(s)'.format(len(config['backups'])))
             print('  - {} backup target(s)'.format(len(config['targets'])))
 
-            for i, target in config['targets']:
+            for i, target in enumerate(config['targets']):
                 if target.get('host') is None:
                     print(CBOLD + LWARN, 'Warning: Missing "host" attribute in target #{}'.format(
                         target.get('host', '#{}'.format(i+1))))
