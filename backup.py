@@ -300,6 +300,18 @@ try:
             print('  - Alert emails: {}'.format(config['alert_emails']))
             print('  - {} backup profile(s)'.format(len(config['backups'])))
             print('  - {} backup target(s)'.format(len(config['targets'])))
+
+            for i, target in config['targets']:
+                if target.get('host') is None:
+                    print(CBOLD + LWARN, 'Warning: Missing "host" attribute in target #{}'.format(
+                        target.get('host', '#{}'.format(i+1))))
+                if target.get('user') is None:
+                    print(CBOLD + LWARN, 'Warning: Missing "user" attribute in target {}'.format(
+                        target.get('host', '#{}'.format(i+1))))
+                if target.get('dir') is None:
+                    print(CBOLD + LWARN, 'Warning: Missing "dir" attribute in target {}'.format(
+                        target.get('host', '#{}'.format(i+1))))
+
         except Exception:
             print('Could not parse configuration:')
             print(traceback.format_exc())
