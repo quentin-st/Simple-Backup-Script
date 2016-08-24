@@ -23,13 +23,15 @@ config = {
 }
 config_filename = 'config.json'
 config_filename_old = 'config.py'
+config_filepath = os.path.join(os.path.dirname(__file__), config_filename)
+config_filepath_old = os.path.join(os.path.dirname(__file__), config_filename_old)
 
 
 # Functions
 def load_config():
     # Load config
-    if not os.path.isfile(config_filename):
-        if os.path.isfile(config_filename_old):
+    if not os.path.isfile(config_filepath):
+        if os.path.isfile(config_filepath_old):
             print(CBOLD + LWARN, '\n{} is deprecated. Please use --migrate to generate {}'.format(
                 config_filename_old, config_filename), CRESET)
         else:
@@ -37,7 +39,7 @@ def load_config():
 
         sys.exit(1)
 
-    with open(config_filename, 'r') as config_file:
+    with open(config_filepath, 'r') as config_file:
         json_config = json.load(config_file)
 
     config['days_to_keep'] = json_config.get('days_to_keep', config['days_to_keep'])
