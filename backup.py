@@ -1,19 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import os
-import shutil
 import sys
-import inspect
 import argparse
 import time
 import socket
-import datetime
-import pysftp
 import traceback
 import json
 
 import plugins
-from plugins import *
+import targets
 from utils.stdio import CRESET, CBOLD, LGREEN, CDIM, LWARN
 
 config = {
@@ -48,24 +44,9 @@ def load_config():
     config['targets'] = json_config.get('targets', [])
 
 
-def get_supported_backup_profiles():
-    plugins_list = {}
-    for plugin_pkg_name, plugin_pkg in inspect.getmembers(plugins, inspect.ismodule):
-        # Get class from this member
-        plugins_list[plugin_pkg_name] = plugin_pkg.get_main_class()
-    return plugins_list
-
-
-def print_upload_progress(transferred, total):
-    workdone = transferred/total
-    print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(workdone * 50), workdone * 100), end="", flush=True)
-
-
 def send_file(backup, backup_filepath):
     # Send the file to each target
-    for target in config['targets']:
-        type = target.get('type', 'remote')
-
+    for target_profile in config['targets']:
         # Build destination filename
         dest_file_name = 'backup-{hostname}-{timestamp}-{backup_name}({backup_profile}).{file_extension}'.format(
             hostname=socket.gethostname(),
@@ -75,75 +56,18 @@ def send_file(backup, backup_filepath):
             file_extension=backup.get('file_extension')
         )
 
-        target_dir = target.get('dir')
+        _targets = targets.get_supported_targets()
+        type = target_profile.get('type', 'remote')
+        if type not in _targets:
+            print("Unknown target type \"{}\".".format(type))
+            sys.exit(1)
 
-        if type == 'remote':
-            user = target.get('user')
-            host = target.get('host')
-            port = target.get('port', 22)
+        target = _targets[type]()
+        success = target.copy_to_target(config, target_profile, backup_filepath, dest_file_name)
 
-            print(CBOLD+LGREEN, "\n==> Connecting to {}@{}:{}...".format(user, host, port), CRESET)
-
-            # Init SFTP connection
-            try:
-                cnopts = pysftp.CnOpts()
-                if target.get('disable_hostkey_checking', False):
-                    cnopts.hostkeys = None
-
-                conn = pysftp.Connection(
-                    host=host,
-                    username=target.get('user'),
-                    port=port,
-                    cnopts=cnopts
-                )
-
-                conn._transport.set_keepalive(30)
-            except (pysftp.ConnectionException, pysftp.SSHException):
-                print(CBOLD, "Unknown exception while connecting to host:", CRESET)
-                print(traceback.format_exc())
-                send_mail_on_error(backup, traceback)
-                continue
-            except (pysftp.CredentialException, pysftp.AuthenticationException):
-                print(CBOLD, "Credentials or authentication exception while connecting to host:", CRESET)
-                print(traceback.format_exc())
-                send_mail_on_error(backup, traceback)
-                continue
-
-            # Create destination directory if necessary
-            try:
-                # Try...
-                conn.chdir(target_dir)
-            except IOError:
-                # Create directories
-                current_dir = ''
-                for directory in target_dir.split('/'):
-                    current_dir = os.path.join(current_dir, directory)
-                    try:
-                        conn.chdir(current_dir)
-                    except:
-                        print('Creating missing directory {}'.format(current_dir))
-                        conn.mkdir(current_dir)
-                        conn.chdir(current_dir)
-                        pass
-
-            print(CBOLD+LGREEN, "\n==> Starting transfer: {} => {}".format(backup_filepath, dest_file_name), CRESET)
-
-            # Upload file
-            conn.put(backup_filepath, os.path.join(target_dir, dest_file_name), callback=print_upload_progress)
-
-            print(CBOLD+LGREEN, "\n==> Transfer finished.", CRESET)
-
-            rotate_backups(target, conn)
-
-            conn.close()
-        elif type == 'local':
-            print(CBOLD + LGREEN, "\n==> Starting copy: {} => {}".format(backup_filepath, dest_file_name), CRESET)
-
-            if not os.path.exists(target_dir):
-                os.makedirs(target_dir)
-
-            shutil.copy(backup_filepath, os.path.join(target_dir, dest_file_name))
-    return
+        if success is not True:
+            # That's an error
+            send_mail_on_error(backup, success)
 
 
 def get_backup(backup_name):
@@ -155,7 +79,7 @@ def do_backup(backup):
     backup_profile = backup.get('profile')
 
     # Check backup profile
-    profiles = get_supported_backup_profiles()
+    profiles = plugins.get_supported_backup_profiles()
     if backup_profile not in profiles:
         print("Unknown project type \"{}\".".format(backup_profile))
         sys.exit(1)
@@ -180,31 +104,6 @@ def do_backup(backup):
         os.remove(backup_filepath)
 
         plugin.clean()
-
-    return
-
-
-def rotate_backups(target, conn):
-    backup_dir = target.get('dir')
-    # CD to backups dir
-    conn.chdir(backup_dir)
-
-    now = datetime.datetime.now()
-    # Loop over all files in the directory
-    for file in conn.listdir(backup_dir):
-        if file.startswith('backup-'):
-            fullpath = os.path.join(backup_dir, file)
-
-            if conn.isfile(fullpath):
-                timestamp = conn.stat(fullpath).st_atime
-                createtime = datetime.datetime.fromtimestamp(timestamp)
-                delta = now - createtime
-
-                if delta.days > target.get('days_to_keep', config['days_to_keep']):
-                    print(CBOLD+LGREEN, "\n==> Deleting backup file {file} ({days} days old)".format(
-                        file=file, days=delta
-                    ), CRESET)
-                    conn.unlink(file)
 
     return
 

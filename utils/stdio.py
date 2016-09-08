@@ -21,3 +21,8 @@ def ppexec(cmd):
 
 def simple_exec(cmd, args=None):
     return Popen([cmd, args] if args else cmd, stdout=PIPE).communicate()[0].decode('UTF-8').strip()
+
+
+def print_progress(transferred, total):
+    workdone = transferred/total
+    print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(workdone * 50), workdone * 100), end="", flush=True)

@@ -3,7 +3,7 @@ import os
 import shutil
 import tempfile
 
-from utils.stdio import CRESET, CBOLD, LGREEN, LWARN
+from utils.stdio import LWARN
 
 
 def get_main_class():
@@ -53,7 +53,7 @@ class Filesystem:
             dir_name = os.path.basename(os.path.normpath(directory))
 
             # Create single tar.gz file for this dir
-            singletar_filename = dir_name + ".tar.gz"
+            singletar_filename = str(dir_name) + ".tar.gz"
             print("    + " + singletar_filename)
 
             single_tar = tarfile.open(singletar_filename, 'w:gz')

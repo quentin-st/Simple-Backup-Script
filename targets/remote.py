@@ -1,0 +1,95 @@
+import os
+import datetime
+import traceback
+
+from utils.stdio import CRESET, CBOLD, LGREEN, print_progress
+
+
+def get_main_class():
+    return Remote
+
+
+class Remote:
+    def copy_to_target(self, config, target, local_filepath, target_filename):
+        import pysftp
+
+        user = target.get('user')
+        host = target.get('host')
+        port = target.get('port', 22)
+
+        print(CBOLD + LGREEN, "\n==> Connecting to {}@{}:{}...".format(user, host, port), CRESET)
+
+        # Init SFTP connection
+        try:
+            cnopts = pysftp.CnOpts()
+            if target.get('disable_hostkey_checking', False):
+                cnopts.hostkeys = None
+
+            conn = pysftp.Connection(
+                host=host,
+                username=target.get('user'),
+                port=port,
+                cnopts=cnopts
+            )
+
+            conn._transport.set_keepalive(30)
+        except (pysftp.ConnectionException, pysftp.SSHException):
+            print(CBOLD, "Unknown exception while connecting to host:", CRESET)
+            print(traceback.format_exc())
+            return traceback
+        except (pysftp.CredentialException, pysftp.AuthenticationException):
+            print(CBOLD, "Credentials or authentication exception while connecting to host:", CRESET)
+            print(traceback.format_exc())
+            return traceback
+
+        target_dir = target.get('dir')
+
+        # Create destination directory if necessary
+        try:
+            # Try...
+            conn.chdir(target_dir)
+        except IOError:
+            # Create directories
+            current_dir = ''
+            for directory in target_dir.split('/'):
+                current_dir = os.path.join(current_dir, directory)
+                try:
+                    conn.chdir(current_dir)
+                except:
+                    print('Creating missing directory {}'.format(current_dir))
+                    conn.mkdir(current_dir)
+                    conn.chdir(current_dir)
+                    pass
+
+        print(CBOLD + LGREEN, "\n==> Starting transfer: {} => {}".format(local_filepath, target_filename), CRESET)
+
+        # Upload file
+        conn.put(local_filepath, os.path.join(target_dir, target_filename), callback=print_progress)
+
+        print(CBOLD + LGREEN, "\n==> Transfer finished.", CRESET)
+
+        self.rotate_backups(config, target, conn)
+
+        conn.close()
+
+    def rotate_backups(self, config, target, conn):
+        backup_dir = target.get('dir')
+        # CD to backups dir
+        conn.chdir(backup_dir)
+
+        now = datetime.datetime.now()
+        # Loop over all files in the directory
+        for file in conn.listdir(backup_dir):
+            if file.startswith('backup-'):
+                fullpath = os.path.join(backup_dir, file)
+
+                if conn.isfile(fullpath):
+                    timestamp = conn.stat(fullpath).st_atime
+                    createtime = datetime.datetime.fromtimestamp(timestamp)
+                    delta = now - createtime
+
+                    if delta.days > target.get('days_to_keep', config['days_to_keep']):
+                        print(CBOLD + LGREEN, "\n==> Deleting backup file {file} ({days} days old)".format(
+                            file=file, days=delta
+                        ), CRESET)
+                        conn.unlink(file)
