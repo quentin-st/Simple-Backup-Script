@@ -13,7 +13,7 @@ class Local:
         target_dir = target.get('dir')
         target_path = os.path.join(target_dir, target_filename)
 
-        print(CBOLD + LGREEN, "\n==> Starting copy: {} => {}".format(local_filepath, target_path), CRESET)
+        print(CBOLD + LGREEN, "Starting copy: {} => {}".format(local_filepath, target_path), CRESET)
 
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)

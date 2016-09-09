@@ -2,7 +2,7 @@ import os
 import datetime
 import traceback
 
-from utils.stdio import CRESET, CBOLD, LGREEN, print_progress
+from utils.stdio import CDIM, CRESET, CBOLD, LGREEN, print_progress
 
 
 def get_main_class():
@@ -17,7 +17,8 @@ class Remote:
         host = target.get('host')
         port = target.get('port', 22)
 
-        print(CBOLD + LGREEN, "\n==> Connecting to {}@{}:{}...".format(user, host, port), CRESET)
+        print('')
+        print(CBOLD + LGREEN, "Connecting to {}@{}:{}...".format(user, host, port), CRESET)
 
         # Init SFTP connection
         try:
@@ -56,17 +57,17 @@ class Remote:
                 try:
                     conn.chdir(current_dir)
                 except:
-                    print('Creating missing directory {}'.format(current_dir))
+                    print(CDIM, 'Creating missing directory {}'.format(current_dir), CRESET)
                     conn.mkdir(current_dir)
                     conn.chdir(current_dir)
                     pass
 
-        print(CBOLD + LGREEN, "\n==> Starting transfer: {} => {}".format(local_filepath, target_filename), CRESET)
+        print(CBOLD + LGREEN, "Starting transfer: {} => {}".format(local_filepath, target_filename), CRESET)
 
         # Upload file
         conn.put(local_filepath, os.path.join(target_dir, target_filename), callback=print_progress)
 
-        print(CBOLD + LGREEN, "\n==> Transfer finished.", CRESET)
+        print(CBOLD + LGREEN, "Transfer finished.", CRESET)
 
         self.rotate_backups(config, target, conn)
 
@@ -89,7 +90,7 @@ class Remote:
                     delta = now - createtime
 
                     if delta.days > target.get('days_to_keep', config['days_to_keep']):
-                        print(CBOLD + LGREEN, "\n==> Deleting backup file {file} ({days} days old)".format(
+                        print(CBOLD + LGREEN, "Deleting backup file {file} ({days} days old)".format(
                             file=file, days=delta
                         ), CRESET)
                         conn.unlink(file)

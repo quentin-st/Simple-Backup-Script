@@ -115,6 +115,20 @@ And here's a local sample:
 }
 ```
 
+For hubiC:
+
+```js
+{
+    "type":             "hubic",
+    "dir":              "/Backups/",
+    "client_id":        "",
+    "client_secret":    "",
+    "container":        "default",
+    "days_to_keep":     7           // You can override global DAYS_TO_KEEP for each target
+}
+```
+
+
 > **Important note**: the `"dir"` directory must only contain backups from this instance. Any other file could be deleted during backups rotation.
 
 Once done, run the `./backup.py --test-config` command to check if everything's OK.
