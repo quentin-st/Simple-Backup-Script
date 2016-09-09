@@ -117,12 +117,18 @@ And here's a local sample:
 
 For hubiC:
 
+> Note: this target needs `python-swiftclient` package.
+
+> Note2: hubiC dependencies does not support Python 3.2.
+
 ```js
 {
     "type":             "hubic",
     "dir":              "/Backups/",
     "client_id":        "",
     "client_secret":    "",
+    "username":         "",
+    "password":         "",
     "container":        "default",
     "days_to_keep":     7           // You can override global DAYS_TO_KEEP for each target
 }

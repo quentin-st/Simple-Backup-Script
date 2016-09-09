@@ -1,13 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import os
 import sys
+import os
 import argparse
 import time
 import socket
 import traceback
 import json
-
 import plugins
 import targets
 from utils.stdio import CRESET, CBOLD, LGREEN, CDIM, LWARN
@@ -61,6 +60,12 @@ def send_file(backup, backup_filepath):
         if type not in _targets:
             print("Unknown target type \"{}\".".format(type))
             sys.exit(1)
+
+        if type == 'hubic' and sys.version_info.major == 3 and sys.version_info.minor == 2:
+            message = 'Hubic profile dependencies aren\'t compatible with Python 3.2.'
+            print(CBOLD + LWARN, message, CRESET)
+            send_mail_on_error(backup, message)
+            continue
 
         target = _targets[type]()
         success = target.copy_to_target(config, target_profile, backup_filepath, dest_file_name)
@@ -134,6 +139,10 @@ def send_mail(recipient, subject, body):
 
 
 try:
+    # Check python version
+    if sys.version_info.major < 3:
+        print('Warning: Python 2.x isn\'t officially supported. Use at your own risk.')
+
     # Check command line arguments
     parser = argparse.ArgumentParser(description='Easily backup projects')
     parser.add_argument('--self-update', action='store_true', dest='self_update')
@@ -222,7 +231,7 @@ try:
 
         # Ask for backup to run
         if len(config['backups']) == 0:
-            print(CBOLD + LGREEN, "\nPlease configure backup projects in backup.py", CRESET)
+            print(CBOLD + LGREEN, "Please configure backup projects in backup.py", CRESET)
             sys.exit(1)
 
         if args.all:
