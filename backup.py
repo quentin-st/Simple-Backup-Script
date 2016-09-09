@@ -68,11 +68,10 @@ def send_file(backup, backup_filepath):
             continue
 
         target = _targets[type]()
-        success = target.copy_to_target(config, target_profile, backup_filepath, dest_file_name)
+        error = target.copy_to_target(config, target_profile, backup_filepath, dest_file_name)
 
-        if success is not True:
-            # That's an error
-            send_mail_on_error(backup, success)
+        if error is not None:
+            send_mail_on_error(backup, error)
 
 
 def get_backup(backup_name):

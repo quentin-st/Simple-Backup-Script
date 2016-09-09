@@ -29,5 +29,3 @@ class Hubic:
             hubic.put_object(container, target_filepath, fh.read())
 
         print(CBOLD + LGREEN, "Transfer finished.", CRESET)
-
-        return True
