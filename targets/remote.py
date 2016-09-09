@@ -67,6 +67,7 @@ class Remote:
         # Upload file
         conn.put(local_filepath, os.path.join(target_dir, target_filename), callback=print_progress)
 
+        print('')
         print(CBOLD + LGREEN, "Transfer finished.", CRESET)
 
         self.rotate_backups(config, target, conn)

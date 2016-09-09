@@ -17,6 +17,8 @@ class Hubic:
             username=target.get('username'),
             password=target.get('password')
         )
+
+        print(CDIM, 'Authenticating to hubiC...')
         hubic.os_auth()
 
         container = target.get('container', 'default')
@@ -25,7 +27,7 @@ class Hubic:
 
         # Upload file
         with open(local_filepath, 'rb') as fh:
-            print(CBOLD + LGREEN, "Starting transfer: {} => {}".format(local_filepath, target_filepath), CRESET)
+            print(CBOLD + LGREEN, "Starting transfer to hubiC: {} => {}".format(local_filepath, target_filepath), CRESET)
             hubic.put_object(container, target_filepath, fh.read())
 
         print(CBOLD + LGREEN, "Transfer finished.", CRESET)

@@ -73,6 +73,8 @@ def send_file(backup, backup_filepath):
         if error is not None:
             send_mail_on_error(backup, error)
 
+            print('')
+
 
 def get_backup(backup_name):
     candidates = [b for b in config['backups'] if b.get('name') == backup_name]
