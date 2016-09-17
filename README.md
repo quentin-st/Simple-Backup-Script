@@ -153,6 +153,12 @@ You can either run it in its interactive mode (default), or specify the backup p
 ./backup.py --all
 ```
 
+You can also target a single target by specifying its index in the targets list:
+
+```bash
+./backup.py --all --target 0
+```
+
 You can configure a daily cron using `crontab -e`: add the following line to the cron file:
 
 ```

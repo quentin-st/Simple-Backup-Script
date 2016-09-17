@@ -57,8 +57,10 @@ def load_config():
 
 
 def send_file(backup, backup_filepath):
+    backup_targets = config['targets'] if args.target == 'all' else [config['targets'][int(args.target)]]
+
     # Send the file to each target
-    for target_profile in config['targets']:
+    for target_profile in backup_targets:
         # Build destination filename
         dest_file_name = 'backup-{hostname}-{timestamp}-{backup_name}({backup_profile}).{file_extension}'.format(
             hostname=socket.gethostname(),
@@ -161,6 +163,7 @@ try:
     parser = argparse.ArgumentParser(description='Easily backup projects')
     parser.add_argument('--self-update', action='store_true', dest='self_update')
     parser.add_argument('--backup', default='ask_for_it')
+    parser.add_argument('--target', default='all')
     parser.add_argument('-a', '--all', action='store_true')
     parser.add_argument('--migrate', action='store_true')
     parser.add_argument('--test-mails', action='store_true', dest='test_mails')
