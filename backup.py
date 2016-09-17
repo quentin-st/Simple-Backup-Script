@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+""" Easy & simple yet flexible backup script """
+
 import sys
 import os
 import argparse
@@ -10,6 +13,16 @@ import json
 import plugins
 import targets
 from utils.stdio import CRESET, CBOLD, LGREEN, CDIM, LWARN
+
+__author__ = 'Quentin Stoeckel'
+__copyright__ = 'Copyright 2016, Quentin Stoeckel and contributors'
+__credits__ = ['Contributors at https://github.com/chteuchteu/Simple-Backup-Script/graphs/contributors']
+
+__license__ = 'gpl-v2'
+__version__ = '1.0.0'
+__maintainer__ = "qstoeckel"
+__email__ = 'stoeckel.quentin@gmail.com'
+__status__ = 'Production'
 
 config = {
     'days_to_keep': 15,
