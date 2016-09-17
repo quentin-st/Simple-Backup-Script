@@ -1,3 +1,4 @@
+import sys
 from subprocess import Popen, PIPE, STDOUT
 
 CRESET = "\033[0m"
@@ -25,4 +26,5 @@ def simple_exec(cmd, args=None):
 
 def print_progress(transferred, total):
     workdone = transferred/total
-    print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(workdone * 50), workdone * 100), end="", flush=True)
+    sys.stdout.write("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(workdone * 50), workdone * 100))
+    sys.stdout.flush()
