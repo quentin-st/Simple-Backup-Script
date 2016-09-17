@@ -76,8 +76,10 @@ def send_file(backup, backup_filepath):
             print("Unknown target type \"{}\".".format(type))
             sys.exit(1)
 
-        if type == 'hubic' and sys.version_info.major == 3 and sys.version_info.minor == 2:
-            message = 'Hubic profile dependencies aren\'t compatible with Python 3.2.'
+        if type == 'hubic' and (sys.version_info.major == 3 and sys.version_info.minor == 2 or sys.version_info.major == 2):
+            message = 'Hubic profile dependencies aren\'t compatible with Python {}.{}'.format(
+                sys.version_info.major, sys.version_info.minor
+            )
             print(CBOLD + LWARN, message, CRESET)
             send_mail_on_error(backup, message)
             continue
