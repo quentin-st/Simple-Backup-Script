@@ -1,8 +1,8 @@
 import sys
 import inspect
-from targets import local, remote, hubic
+from targets import local, remote, hubic, ftp
 
-__all__ = ['local', 'remote', 'hubic']
+__all__ = ['local', 'remote', 'hubic', 'ftp']
 
 
 def get_supported_targets():

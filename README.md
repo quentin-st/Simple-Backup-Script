@@ -32,7 +32,7 @@ It also contains a `clean` function to delete temporary files created during its
 ### Transfer
 Once everything is ready, let's upload the files to each remote. We can either upload backup files to remote targets, or copy them in a local directory.
 
-#### Remote target configuration
+#### Remote (SFTP) target configuration
 **Note**: *SSH Public Key Authentication* **must** be set up or the script won't connect to your remote backup targets:
 
 1. Generate SSH private (`~/.ssh/id_rsa`) & public (`~/.ssh/id_rsa.pub`) keys if not already done:
@@ -92,8 +92,9 @@ You can add as many backup profiles as you wish.
 Check [`config-sample.json`](config-sample.json) for some examples: it contains a sample configuration for each plugin.
 
 ### Targets
-Each backup profile will then be sent/copied to every target configured. A target can either be `remote` or `local`. Here's a remote sample:
+Each backup profile will then be sent/copied to every target configured. A target can either be one of the following:
 
+#### Remote (SFTP)
 ```js
 {
     "type":     "remote",
@@ -105,7 +106,7 @@ Each backup profile will then be sent/copied to every target configured. A targe
 }
 ```
 
-And here's a local sample:
+#### Local (simple copy)
 
 ```js
 {
@@ -115,11 +116,25 @@ And here's a local sample:
 }
 ```
 
-For hubiC:
+#### FTP
+```js
+{
+    "type":     "ftp",
+    "host":     "bkup.domain.com",  // Can either be a local/remote IP address
+    "port":     21,                 // Optional, default 21
+    "user":     "john",
+    "password": "j0hn",
+    "dir":      "/home/john/backups/"
+}
+```
+
+#### hubiC
 
 > Note: this target needs `python-swiftclient` package.
 
 > Note2: hubiC dependencies does not support Python 3.2.
+
+> Note3: this is very experimental.
 
 ```js
 {
