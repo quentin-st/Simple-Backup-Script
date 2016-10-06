@@ -56,45 +56,36 @@ def load_config():
     config['targets'] = json_config.get('targets', [])
 
 
-def send_file(backup, backup_filepath):
-    backup_targets = config['targets'] if args.target == 'all' else [config['targets'][int(args.target)]]
+def send_file(backup, backup_filepath, target_profile):
+    # Build destination filename
+    dest_file_name = 'backup-{hostname}-{timestamp}-{backup_name}({backup_profile}).{file_extension}'.format(
+        hostname=socket.gethostname(),
+        timestamp=time.strftime("%Y%m%d-%H%M"),
+        backup_profile=backup.get('profile'),
+        backup_name=backup.get('name'),
+        file_extension=backup.get('file_extension')
+    )
 
-    # Send the file to each target
-    for target_profile in backup_targets:
-        # Build destination filename
-        dest_file_name = 'backup-{hostname}-{timestamp}-{backup_name}({backup_profile}).{file_extension}'.format(
-            hostname=socket.gethostname(),
-            timestamp=time.strftime("%Y%m%d-%H%M"),
-            backup_profile=backup.get('profile'),
-            backup_name=backup.get('name'),
-            file_extension=backup.get('file_extension')
+    _targets = targets.get_supported_targets()
+    type = target_profile.get('type', 'remote')
+    if type not in _targets:
+        print("Unknown target type \"{}\".".format(type))
+        sys.exit(1)
+
+    if type == 'hubic' and (sys.version_info.major == 3 and sys.version_info.minor == 2 or sys.version_info.major == 2):
+        message = 'Hubic profile dependencies aren\'t compatible with Python {}.{}'.format(
+            sys.version_info.major, sys.version_info.minor
         )
+        print(CBOLD + LWARN, message, CRESET)
+        send_mail_on_error(backup, message)
+        return
 
-        _targets = targets.get_supported_targets()
-        type = target_profile.get('type', 'remote')
-        if type not in _targets:
-            print("Unknown target type \"{}\".".format(type))
-            sys.exit(1)
+    target = _targets[type]()
+    error = target.copy_to_target(config, target_profile, backup_filepath, dest_file_name)
 
-        if type == 'hubic' and (sys.version_info.major == 3 and sys.version_info.minor == 2 or sys.version_info.major == 2):
-            message = 'Hubic profile dependencies aren\'t compatible with Python {}.{}'.format(
-                sys.version_info.major, sys.version_info.minor
-            )
-            print(CBOLD + LWARN, message, CRESET)
-            send_mail_on_error(backup, message)
-            continue
-
-        target = _targets[type]()
-        try:
-            error = target.copy_to_target(config, target_profile, backup_filepath, dest_file_name)
-        except:
-            print(CBOLD + LWARN, 'Unexpected exception while trying to send file to target {}'.format(type), CRESET)
-            error = traceback
-
-        if error is not None:
-            send_mail_on_error(backup, error)
-
-            print('')
+    if error is not None:
+        send_mail_on_error(backup, error)
+        print('')
 
 
 def get_backup(backup_name):
@@ -117,20 +108,21 @@ def do_backup(backup):
     backup_filepath = plugin.create_backup_file(backup)
     backup['file_extension'] = plugin.file_extension
 
-    # Send it to the moon
-    try:
-        send_file(backup, backup_filepath)
-    except Exception:
-        # Print exception (for output in logs)
-        print(traceback.format_exc())
+    # Send it to the moon (to each target)
+    backup_targets = config['targets'] if args.target == 'all' else [config['targets'][int(args.target)]]
+    for target_profile in backup_targets:
+        try:
+            send_file(backup, backup_filepath, target_profile)
+        except Exception:
+            # Print exception (for output in logs)
+            print(traceback.format_exc())
 
-        send_mail_on_error(backup, traceback)
-    finally:
-        # Delete the file
-        print(CDIM, "Deleting {}".format(backup_filepath), CRESET)
-        os.remove(backup_filepath)
+            send_mail_on_error(backup, traceback)
 
-        plugin.clean()
+    # Delete the file
+    print(CDIM, "Deleting {}".format(backup_filepath), CRESET)
+    os.remove(backup_filepath)
+    plugin.clean()
 
     return
 
