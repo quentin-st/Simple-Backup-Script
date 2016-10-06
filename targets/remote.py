@@ -51,7 +51,7 @@ class Remote:
             conn.chdir(target_dir)
         except IOError:
             # Create directories
-            current_dir = '/' if target_dir.startswith('/') else ''
+            current_dir = ''
             for directory in target_dir.split('/'):
                 current_dir = os.path.join(current_dir, directory)
                 try:
@@ -65,7 +65,7 @@ class Remote:
         print(CBOLD + LGREEN, "Starting transfer: {} => {}".format(local_filepath, target_filename), CRESET)
 
         # Upload file
-        conn.put(local_filepath, os.path.join(target_dir, target_filename), callback=print_progress)
+        conn.put(local_filepath, target_filename, callback=print_progress)
 
         print('')
         print(CBOLD + LGREEN, "Transfer finished.", CRESET)
@@ -76,6 +76,11 @@ class Remote:
 
     def rotate_backups(self, config, target, conn):
         backup_dir = target.get('dir')
+        days_to_keep = target.get('days_to_keep', config['days_to_keep'])
+
+        if days_to_keep == -1:
+            return
+
         # CD to backups dir
         conn.chdir(backup_dir)
 
@@ -90,7 +95,7 @@ class Remote:
                     createtime = datetime.datetime.fromtimestamp(timestamp)
                     delta = now - createtime
 
-                    if delta.days > target.get('days_to_keep', config['days_to_keep']):
+                    if delta.days > days_to_keep:
                         print(CBOLD + LGREEN, "Deleting backup file {file} ({days} days old)".format(
                             file=file, days=delta
                         ), CRESET)

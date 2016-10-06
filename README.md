@@ -149,6 +149,7 @@ Each backup profile will then be sent/copied to every target configured. A targe
 }
 ```
 
+> Note: setting `days_to_keep` to `-1` will disable backups rotation.
 
 > **Important note**: the `"dir"` directory must only contain backups from this instance. Any other file could be deleted during backups rotation.
 
