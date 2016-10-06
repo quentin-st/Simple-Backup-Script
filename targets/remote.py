@@ -51,12 +51,12 @@ class Remote:
             conn.chdir(target_dir)
         except IOError:
             # Create directories
-            current_dir = ''
+            current_dir = '/' if target_dir.startswith('/') else ''
             for directory in target_dir.split('/'):
                 current_dir = os.path.join(current_dir, directory)
                 try:
                     conn.chdir(current_dir)
-                except:
+                except IOError:
                     print(CDIM, 'Creating missing directory {}'.format(current_dir), CRESET)
                     conn.mkdir(current_dir)
                     conn.chdir(current_dir)
