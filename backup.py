@@ -85,7 +85,11 @@ def send_file(backup, backup_filepath):
             continue
 
         target = _targets[type]()
-        error = target.copy_to_target(config, target_profile, backup_filepath, dest_file_name)
+        try:
+            error = target.copy_to_target(config, target_profile, backup_filepath, dest_file_name)
+        except:
+            print(CBOLD + LWARN, 'Unexpected exception while trying to send file to target {}'.format(type), CRESET)
+            error = traceback
 
         if error is not None:
             send_mail_on_error(backup, error)
