@@ -34,14 +34,14 @@ class Remote:
             )
 
             conn._transport.set_keepalive(30)
-        except (pysftp.ConnectionException, pysftp.SSHException):
+        except (pysftp.ConnectionException, pysftp.SSHException) as e:
             print(CBOLD, "Unknown exception while connecting to host:", CRESET)
             print(traceback.format_exc())
-            return traceback
-        except (pysftp.CredentialException, pysftp.AuthenticationException):
+            return e, traceback
+        except (pysftp.CredentialException, pysftp.AuthenticationException) as e:
             print(CBOLD, "Credentials or authentication exception while connecting to host:", CRESET)
             print(traceback.format_exc())
-            return traceback
+            return e, traceback
 
         target_dir = target.get('dir')
 

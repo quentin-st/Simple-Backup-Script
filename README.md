@@ -17,6 +17,10 @@ sudo pip3 install pysftp
 sudo pip3 install requests
 ```
 
+*Optional*: if you want errors to be reported to Sentry, install its SDK:
+```bash
+pip install --upgrade sentry-sdk
+```
 
 ## How does it work?
 There are two customizable steps in this process:

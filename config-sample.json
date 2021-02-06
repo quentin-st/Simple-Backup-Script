@@ -1,6 +1,7 @@
 {
     "days_to_keep": 15,
     "alert_emails": [""],
+    "sentry_dsn": null,
 
     "backups": [
         {

@@ -52,8 +52,12 @@ def load_config():
 
     config['days_to_keep'] = json_config.get('days_to_keep', config['days_to_keep'])
     config['alert_emails'] = json_config.get('alert_emails')
+    config['sentry_dsn'] = json_config.get('sentry_dsn')
     config['backups'] = json_config.get('backups', [])
     config['targets'] = json_config.get('targets', [])
+
+    # Now that we know if Sentry should be enabled, load its sdk:
+    init_sentry()
 
 
 def send_file(backup, backup_filepath, target_profile):
@@ -76,7 +80,8 @@ def send_file(backup, backup_filepath, target_profile):
     error = target.copy_to_target(config, target_profile, backup_filepath, dest_file_name)
 
     if error is not None:
-        send_mail_on_error(backup, error)
+        e, traceback = error
+        handle_error(backup, e, traceback)
         print('')
 
 
@@ -105,11 +110,11 @@ def do_backup(backup):
     for target_profile in backup_targets:
         try:
             send_file(backup, backup_filepath, target_profile)
-        except Exception:
+        except Exception as e:
             # Print exception (for output in logs)
             print(traceback.format_exc())
 
-            send_mail_on_error(backup, traceback)
+            handle_error(backup, e, traceback)
 
     # Delete the file
     print(CDIM, "Deleting {}".format(backup_filepath), CRESET)
@@ -119,16 +124,36 @@ def do_backup(backup):
     return
 
 
-def send_mail_on_error(backup, traceback):
+def init_sentry():
+    sentry_dsn = config.get('sentry_dsn', None)
+    if sentry_dsn is not None:
+        try:
+            import sentry_sdk
+            sentry_sdk.init(sentry_dsn)
+            return sentry_sdk
+        except Exception as error:
+            print(error)
+
+    return None
+
+
+def handle_error(backup, exception, traceback):
+    # sentry
+    sentry = init_sentry()
+    if sentry is not None:
+        sentry.set_level('error')
+        sentry.set_tag('backup', backup.get('name'))
+        sentry.capture_exception(exception)
+
+    # mails
     email_addresses = config.get('alert_emails', None)
     if email_addresses is not None:
+        message = 'Simple-Backup-Script: backup "{}" failed'.format(backup.get('name'))
+        formatted_traceback = traceback.format_exc()
+
         for address in [a for a in email_addresses if a]:
             if address:
-                send_mail(
-                    address,
-                    'Simple-Backup-Script: backup "{}" failed'.format(backup.get('name')),
-                    traceback.format_exc()
-                )
+                send_mail(address, message, formatted_traceback)
 
 
 # Inspired by http://stackoverflow.com/a/27874213/1474079
