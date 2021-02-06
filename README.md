@@ -128,27 +128,6 @@ Each backup profile will then be sent/copied to every target configured. A targe
 }
 ```
 
-#### hubiC
-
-> Note: this target needs `python-swiftclient` package.
-
-> Note2: hubiC dependencies does not support Python 3.2.
-
-> Note3: this is very experimental.
-
-```js
-{
-    "type":             "hubic",
-    "dir":              "/Backups/",
-    "client_id":        "",
-    "client_secret":    "",
-    "username":         "",
-    "password":         "",
-    "container":        "default",
-    "days_to_keep":     7           // You can override global DAYS_TO_KEEP for each target
-}
-```
-
 > Note: setting `days_to_keep` to `-1` will disable backups rotation.
 
 > **Important note**: the `"dir"` directory must only contain backups from this instance. Any other file could be deleted during backups rotation.
