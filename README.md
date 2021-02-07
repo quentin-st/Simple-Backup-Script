@@ -75,16 +75,24 @@ You can receive an e-mail when a backups fails for whatsoever reason. Just custo
 with one or more email addresses. A null, empty array (`[]`) or single empty string array value (`[""]`) will disable
 this feature.
 
-```js
+```json
 "alert_email": ["john@doe.com", "it@doe.com", "accounting@doe.com"],
 ```
 
 Once done, run the `./backup.py --test-mails` command to check if it works fine.
 
+
+## Sentry reporting
+Errors can be reported to Sentry:
+
+```json
+"sentry_dsn": "https://123456789abcdef@o1237.ingest.sentry.io/1234567"
+```
+
 ### Backup profiles
 You can add as many backup profiles as you wish.
 
-```js
+```json
 "my_backup": {              // That's the backup name: no special chars nor spaces please
     "profile": "",          // That's the name of the plugin ("mysql", "filesystem" or whatever)
 
@@ -99,7 +107,7 @@ Check [`config-sample.json`](config-sample.json) for some examples: it contains 
 Each backup profile will then be sent/copied to every target configured. A target can either be one of the following:
 
 #### Remote (SFTP)
-```js
+```json
 {
     "type":     "remote",
     "host":     "bkup.domain.com",  // Can either be a local/remote IP address
@@ -112,7 +120,7 @@ Each backup profile will then be sent/copied to every target configured. A targe
 
 #### Local (simple copy)
 
-```js
+```json
 {
     "type":     "local",
     "dir":      "/home/john/backups/",
@@ -121,7 +129,7 @@ Each backup profile will then be sent/copied to every target configured. A targe
 ```
 
 #### FTP
-```js
+```json
 {
     "type":     "ftp",
     "host":     "bkup.domain.com",  // Can either be a local/remote IP address
