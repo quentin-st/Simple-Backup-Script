@@ -62,12 +62,13 @@ def load_config():
 
 def send_file(backup, backup_filepath, target_profile):
     # Build destination filename
-    dest_file_name = 'backup-{hostname}-{timestamp}-{backup_name}({backup_profile}).{file_extension}'.format(
+    filename, file_extension = os.path.splitext(backup_filepath)
+    dest_file_name = 'backup-{hostname}-{timestamp}-{backup_name}({backup_profile}){file_extension}'.format(
         hostname=socket.gethostname(),
         timestamp=time.strftime("%Y%m%d-%H%M"),
         backup_profile=backup.get('profile'),
         backup_name=backup.get('name'),
-        file_extension=backup.get('file_extension')
+        file_extension=file_extension
     )
 
     _targets = targets.get_supported_targets()
@@ -103,7 +104,9 @@ def do_backup(backup):
     print(CBOLD+LGREEN, "Creating backup file", CRESET)
     plugin = profiles[backup_profile]()
     backup_filepath = plugin.create_backup_file(backup)
-    backup['file_extension'] = plugin.file_extension
+    if backup_filepath is None:
+        print("Could not create backup file for \"{}\".".format(backup_profile))
+        return
 
     # Send it to the moon (to each target)
     backup_targets = config['targets'] if args.target == 'all' else [config['targets'][int(args.target)]]
@@ -117,8 +120,9 @@ def do_backup(backup):
             handle_error(backup, e, traceback)
 
     # Delete the file
-    print(CDIM, "Deleting {}".format(backup_filepath), CRESET)
-    os.remove(backup_filepath)
+    if plugin.remove_artifact:
+        print(CDIM, "Deleting {}".format(backup_filepath), CRESET)
+        os.remove(backup_filepath)
     plugin.clean()
 
     return

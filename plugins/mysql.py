@@ -12,7 +12,7 @@ def get_main_class():
 
 class MySQL:
     key_name = "mysql"
-    file_extension = "tar.gz"
+    remove_artifact = True
 
     def __init__(self):
         self.temp_dir = ''

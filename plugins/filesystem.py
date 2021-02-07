@@ -12,7 +12,7 @@ def get_main_class():
 
 class Filesystem:
     key_name = "filesystem"
-    file_extension = "tar.gz"
+    remove_artifact = True
 
     def __init__(self):
         self.temp_dir = ''

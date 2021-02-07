@@ -28,6 +28,12 @@
                 "-/var/www/not-this",
                 "-/var/www/not-this-either"
             ]
+        },
+        {
+            "name": "my_file_backup",
+            "profile": "file",
+
+            "path": "/var/opt/gitlab/backups/gitlab_config_*"
         }
     ],
 

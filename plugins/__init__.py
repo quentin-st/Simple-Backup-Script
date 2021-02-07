@@ -1,8 +1,8 @@
 import sys
 import inspect
-from plugins import postgresql, mysql, filesystem
+from plugins import postgresql, mysql, filesystem, file
 
-__all__ = ['postgresql', 'mysql', 'filesystem']
+__all__ = ['postgresql', 'mysql', 'filesystem', 'file']
 
 
 def get_supported_backup_profiles():

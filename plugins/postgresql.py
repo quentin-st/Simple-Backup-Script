@@ -12,7 +12,7 @@ def get_main_class():
 
 class PostgreSQL():
     key_name = "postgresql"
-    file_extension = "tar.gz"
+    remove_artifact = True
 
     def __init__(self):
         self.temp_dir = ''

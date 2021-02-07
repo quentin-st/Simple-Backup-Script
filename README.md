@@ -2,10 +2,10 @@
 The purpose of this script is to offer a generic way to backup files or databases or whatever and send those backups to remote hosts.
 
 ## Prerequisites
-This script relies on the `pysftp` and `requests`  modules:
+This script relies on the `pysftp` and `requests` modules:
 
 ```bash
-sudo pip install pysftp
+pip3 install pysftp
 ```
 
 *Sidenote*: Please be aware that since we use Python 3, you have to make sure that `pip` installs the module for **Python 3**.
@@ -13,13 +13,13 @@ If your system ships with Python 2 as the default interpreter, `pip install pysf
 In that case, you might want to install `pip3` and run :
 
 ```bash
-sudo pip3 install pysftp
-sudo pip3 install requests
+pip3 install pysftp
+pip3 install requests
 ```
 
 *Optional*: if you want errors to be reported to Sentry, install its SDK:
 ```bash
-pip install --upgrade sentry-sdk
+pip3 install --upgrade sentry-sdk
 ```
 
 ## How does it work?
