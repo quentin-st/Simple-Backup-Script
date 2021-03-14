@@ -33,7 +33,7 @@ class MySQL:
             db_filename = database + '.sql'
 
             # Dump db
-            stdio.ppexec('mysqldump -u {user} -p\'{password}\' {database} > {file_path}'.format(
+            stdio.ppexec('mysqldump -u {user} -p\'{password}\' --no-tablespaces {database} > {file_path}'.format(
                 user=backup.get('database_user'),
                 password=backup.get('database_password').replace("'", "\\'"),
                 database=database,
