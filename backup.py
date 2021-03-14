@@ -253,14 +253,12 @@ try:
 
             for i, target in enumerate(config['targets']):
                 if target.get('host') is None:
-                    print(CBOLD + LWARN, 'Warning: Missing "host" attribute in target {}'.format(
-                        target.get('host', '#{}'.format(i+1))), CRESET)
+                    print(CBOLD + LWARN, 'Warning: Missing "host" attribute in target {}'.format(i), CRESET)
+                host = target.get('host', '#{}'.format(i+1))
                 if target.get('user') is None:
-                    print(CBOLD + LWARN, 'Warning: Missing "user" attribute in target {}'.format(
-                        target.get('host', '#{}'.format(i+1))), CRESET)
+                    print(CBOLD + LWARN, 'Warning: Missing "user" attribute in target {}'.format(host), CRESET)
                 if target.get('dir') is None:
-                    print(CBOLD + LWARN, 'Warning: Missing "dir" attribute in target {}'.format(
-                        target.get('host', '#{}'.format(i+1))), CRESET)
+                    print(CBOLD + LWARN, 'Warning: Missing "dir" attribute in target {}'.format(host), CRESET)
 
         except Exception:
             print('Could not parse configuration:')
