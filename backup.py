@@ -63,6 +63,10 @@ def load_config():
 def send_file(backup, backup_filepath, target_profile):
     # Build destination filename
     filename, file_extension = os.path.splitext(backup_filepath)
+    # ...explicitly handle ".tar.gz" extensions
+    if backup_filepath.endswith('.tar.gz'):
+        file_extension = '.tar.gz'
+
     dest_file_name = 'backup-{hostname}-{timestamp}-{backup_name}({backup_profile}){file_extension}'.format(
         hostname=socket.gethostname(),
         timestamp=time.strftime("%Y%m%d-%H%M"),
