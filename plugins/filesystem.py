@@ -61,7 +61,7 @@ class Filesystem:
             single_tar.close()
 
             # Add it to global tar file
-            tar.add(singletar_filename, arcname=dir_name)
+            tar.add(singletar_filename, arcname=singletar_filename)
 
         tar.close()
 
