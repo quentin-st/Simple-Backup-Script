@@ -188,3 +188,27 @@ Then, `chmod 600 /home/cron_user/.pgpass`. Running `ls -al /home/cron_user/` mus
 ```bash
 -rw-------  1 cron_user cron_user   [...] .pgpass
 ```
+
+## Permissions
+
+When building your profiles list, please be aware of permissions issues that may arise.
+Your (unprivileged) backups user should be able to access all the files that are referenced in this script's
+configuration file.
+For database dumps, it's recommended to create a specific user with limited roles (SELECT & LOCK should be fine).
+
+For filesystem archives, you can use ACLs to grant permissions: (replace `USER="backups"` with the name of your Unix user)
+
+```bash
+function set_acl() {
+    # set ACL on var folder if necessary
+    USER="backups"
+    FOLDER="$1"
+    ACL=$(getfacl "$FOLDER" | grep -E "$USER:..x$" -ic)
+    if [[ "$ACL" != 4 ]]; then
+        echo "setting missing ACLs on $FOLDER"
+        setfacl -R -m u:"$USER":rX "$FOLDER" && setfacl -dR -m u:"$USER":rX "$FOLDER"
+    fi
+}
+
+set_acl "my/path/to/backup"
+```
