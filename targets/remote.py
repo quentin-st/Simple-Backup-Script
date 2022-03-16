@@ -16,6 +16,7 @@ class Remote:
         user = target.get('user')
         host = target.get('host')
         port = target.get('port', 22)
+        password = target.get('password')
 
         print('')
         print(CBOLD + LGREEN, "Connecting to {}@{}:{}...".format(user, host, port), CRESET)
@@ -30,6 +31,7 @@ class Remote:
                 host=host,
                 username=target.get('user'),
                 port=port,
+                password=password,
                 cnopts=cnopts
             )
 
