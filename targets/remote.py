@@ -17,6 +17,16 @@ class Remote:
         host = target.get('host')
         port = target.get('port', 22)
         password = target.get('password')
+        password_file = target.get('password_file')
+
+        if password_file:
+            try :
+                with open(password_file, 'rt') as file:
+                    password = file.read().strip('\r\n')
+            except OSError as e:
+                print(CBOLD, "Unable to open password file", CRESET)
+                print(traceback.format_exc())
+                return e, traceback
 
         print('')
         print(CBOLD + LGREEN, "Connecting to {}@{}:{}...".format(user, host, port), CRESET)
