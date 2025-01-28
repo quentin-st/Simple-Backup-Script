@@ -5,21 +5,19 @@ The purpose of this script is to offer a generic way to backup files or database
 This script relies on the `pysftp` and `requests` modules:
 
 ```bash
-pip3 install pysftp
-```
+# Create venv
+python3 -m venv ./.venv
 
-*Sidenote*: Please be aware that since we use Python 3, you have to make sure that `pip` installs the module for **Python 3**.
-If your system ships with Python 2 as the default interpreter, `pip install pysftp` will install `pysftp` for **Python 2**.
-In that case, you might want to install `pip3` and run :
+# Activate
+source .venv/bin/activate
 
-```bash
-pip3 install pysftp
-pip3 install requests
+# Install requirements
+.venv/bin/pip install -r requirements.txt
 ```
 
 *Optional*: if you want errors to be reported to Sentry, install its SDK:
 ```bash
-pip3 install --upgrade sentry-sdk
+.venv/bin/pip install --upgrade sentry-sdk
 ```
 
 ## How does it work?
@@ -166,10 +164,12 @@ You can also target a single target by specifying its index in the targets list:
 ./backup.py --all --target 0
 ```
 
-You can configure a daily cron using `crontab -e`: add the following line to the cron file:
+You can configure a daily cron using `crontab -e`: add the following line to the cron file.
+Tip: use [cronic](https://habilis.net/cronic/) from `moreutils` (`sudo apt install moreutils`) so that cron notifies you
+on error, but still include the full script output.
 
 ```
-0 0 * * * /home/user/Simple-Backup-Script/backup.py --all
+0 0 * * * cronic /home/user/Simple-Backup-Script/.venv/bin/python /home/user/Simple-Backup-Script/backup.py --all
 ```
 
 ## Plugin-specific considerations
