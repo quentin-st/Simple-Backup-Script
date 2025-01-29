@@ -101,7 +101,7 @@ def do_backup(backup):
     # Check backup profile
     profiles = plugins.get_supported_backup_profiles()
     if backup_profile not in profiles:
-        print("Unknown project type \"{}\".".format(backup_profile))
+        print("Unknown project type \"{}\".".format(backup_profile), file=sys.stderr)
         sys.exit(1)
 
     # JUST DO IT
@@ -109,7 +109,7 @@ def do_backup(backup):
     plugin = profiles[backup_profile]()
     backup_filepath = plugin.create_backup_file(backup)
     if backup_filepath is None:
-        print("Could not create backup file for \"{}\".".format(backup_profile))
+        print("Could not create backup file for \"{}\".".format(backup_profile), file=sys.stderr)
         return
 
     # Send it to the moon (to each target)
@@ -119,7 +119,7 @@ def do_backup(backup):
             send_file(backup, backup_filepath, target_profile)
         except Exception as e:
             # Print exception (for output in logs)
-            print(traceback.format_exc())
+            print(traceback.format_exc(), file=sys.stderr)
 
             handle_error(backup, e, traceback)
 
@@ -180,7 +180,7 @@ def send_mail(recipient, subject, body):
 try:
     # Check python version
     if sys.version_info.major < 3:
-        print('Warning: Python 2.x isn\'t officially supported. Use at your own risk.')
+        print('Warning: Python 2.x isn\'t officially supported. Use at your own risk.', file=sys.stderr)
 
     # Check command line arguments
     parser = argparse.ArgumentParser(description='Easily backup projects')
@@ -202,7 +202,7 @@ try:
         self_dir = os.path.dirname(os.path.realpath(__file__))
 
         if not os.path.isdir(os.path.join(self_dir, '.git')):
-            print(CDIM+LWARN, "Cannot self-update: missing .git directory", CRESET)
+            print(CDIM+LWARN, "Cannot self-update: missing .git directory", CRESET, file=sys.stderr)
             sys.exit(1)
 
         os.chdir(self_dir)
@@ -223,12 +223,12 @@ try:
                         mail_sent = True
                         print('Test mail sent to {}'.format(address))
                     else:
-                        print('Could not send mail to {}'.format(address))
+                        print('Could not send mail to {}'.format(address), file=sys.stderr)
 
             if not mail_sent:
-                print('No mail could be sent.')
+                print('No mail could be sent.', file=sys.stderr)
         else:
-            print('"alert_emails" is null or empty.')
+            print('"alert_emails" is null or empty.', file=sys.stderr)
             sys.exit(1)
 
     elif args.test_config:
@@ -238,11 +238,11 @@ try:
             load_config()
 
             if len(config['backups']) == 0:
-                print(LWARN, 'Error: there a no configured backup profile', CRESET)
+                print(LWARN, 'Error: there a no configured backup profile', CRESET, file=sys.stderr)
                 sys.exit(1)
 
             if len(config['targets']) == 0:
-                print(LWARN, 'Error: there are no configured targets', CRESET)
+                print(LWARN, 'Error: there are no configured targets', CRESET, file=sys.stderr)
                 sys.exit(1)
 
             print(CBOLD + LGREEN, '{} successfully parsed:'.format(config_filename), CRESET)
@@ -253,23 +253,23 @@ try:
 
             for i, target in enumerate(config['targets']):
                 if target.get('host') is None:
-                    print(CBOLD + LWARN, 'Warning: Missing "host" attribute in target {}'.format(i), CRESET)
+                    print(CBOLD + LWARN, 'Warning: Missing "host" attribute in target {}'.format(i), CRESET, file=sys.stderr)
                 host = target.get('host', '#{}'.format(i+1))
                 if target.get('user') is None:
-                    print(CBOLD + LWARN, 'Warning: Missing "user" attribute in target {}'.format(host), CRESET)
+                    print(CBOLD + LWARN, 'Warning: Missing "user" attribute in target {}'.format(host), CRESET, file=sys.stderr)
                 if target.get('dir') is None:
-                    print(CBOLD + LWARN, 'Warning: Missing "dir" attribute in target {}'.format(host), CRESET)
+                    print(CBOLD + LWARN, 'Warning: Missing "dir" attribute in target {}'.format(host), CRESET, file=sys.stderr)
 
         except Exception:
-            print('Could not parse configuration:')
-            print(traceback.format_exc())
+            print('Could not parse configuration:', file=sys.stderr)
+            print(traceback.format_exc(), file=sys.stderr)
 
     else:
         load_config()
 
         # Ask for backup to run
         if len(config['backups']) == 0:
-            print(CBOLD + LGREEN, "Please configure backup projects in backup.py", CRESET)
+            print(CBOLD + LGREEN, "Please configure backup projects in backup.py", CRESET, file=sys.stderr)
             sys.exit(1)
 
         if args.all:
@@ -306,7 +306,7 @@ try:
             backup = get_backup(args.backup)
 
             if backup is None:
-                print("This backup does not exist, or there may be several backups with this name")
+                print("This backup does not exist, or there may be several backups with this name", file=sys.stderr)
                 sys.exit(1)
             else:
                 do_backup(backup)
