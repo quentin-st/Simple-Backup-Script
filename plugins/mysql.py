@@ -42,8 +42,8 @@ class MySQL:
             ))
             os.environ['MYSQL_PWD'] = ''
 
-            if return_code > 0:
-                print('   Got non-zero return code: {code}'.format(code=return_code))
+            if return_code is None or return_code > 0:
+                print('   Got non-zero return code: {code}'.format(code=(return_code if return_code is not None else 'None')))
                 continue
 
             tar.add(os.path.basename(os.path.normpath(db_filename)))
