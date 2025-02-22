@@ -1,4 +1,4 @@
-import os
+import os, sys
 
 from utils.stdio import CDIM, CRESET, CBOLD, LGREEN, print_progress
 
@@ -49,7 +49,9 @@ class Ftp:
             size_sent += block_size
             print_progress(size_sent, size_total)
 
-        ftp.storbinary('STOR {}'.format(target_filename), file, callback=progress, blocksize=block_size)
+        # Don't show progress if non-interactive (it will flood the logs)
+        callback = progress if sys.stdout.isatty() else None
+        ftp.storbinary('STOR {}'.format(target_filename), file, callback=callback, blocksize=block_size)
 
         print('')
         print(CBOLD + LGREEN, "Transfer finished.", CRESET)
