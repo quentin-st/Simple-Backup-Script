@@ -1,5 +1,5 @@
 import os
-import datetime
+from datetime import datetime
 import traceback
 
 from utils.stdio import CDIM, CRESET, CBOLD, LGREEN, print_progress
@@ -96,7 +96,7 @@ class Remote:
         # CD to backups dir
         conn.chdir(backup_dir)
 
-        now = datetime.datetime.now()
+        now = datetime.now()
         # Loop over all files in the directory
         for file in conn.listdir(backup_dir):
             if file.startswith('backup-'):
@@ -104,7 +104,7 @@ class Remote:
 
                 if conn.isfile(fullpath):
                     timestamp = conn.stat(fullpath).st_atime
-                    createtime = datetime.datetime.fromtimestamp(timestamp)
+                    createtime = datetime.fromtimestamp(timestamp)
                     delta = now - createtime
 
                     if delta.days > days_to_keep:

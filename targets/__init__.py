@@ -1,8 +1,8 @@
 import sys
 import inspect
-from targets import local, remote, ftp
+from targets import local, remote, ftp, s3
 
-__all__ = ['local', 'remote', 'ftp']
+__all__ = ['local', 'remote', 'ftp', 's3']
 
 
 def get_supported_targets():

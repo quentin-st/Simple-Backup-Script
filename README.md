@@ -63,6 +63,33 @@ Once everything is ready, let's upload the files to each remote. We can either u
 
 > In both remote and target modes, you have to make sure that the user has the right to write in destination directory.
 
+#### Amazon S3
+Simple-Backup-Script supports uploading files to an S3 bucket (either Amazons, or any S3-compatible provider).
+
+1. Install the pip dependency:
+    ```bash
+    .venv/bin/pip install --upgrade boto3
+    ```
+
+2. Configure the credentials ([see boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html#configuration)):
+    ```bash
+    mkdir ~/.aws
+    vim ~/.aws/credentials
+    ```
+    ```
+    [my-profile-name]
+    aws_access_key_id = YOUR_ACCESS_KEY
+    aws_secret_access_key = YOUR_SECRET_KEY
+
+    # optional:
+    region = eu-west-par
+    endpoint_url = https://s3.eu-west-par.io.cloud.ovh.net
+    s3 =
+      signature_version = s3v4
+    request_checksum_calculation = when_required
+    response_checksum_validation = when_required
+    ```
+
 ## Configuration
 Copy or rename `config-sample.json` to get `config.json`.
 
@@ -104,6 +131,12 @@ Check [`config-sample.json`](config-sample.json) for some examples: it contains 
 ### Targets
 Each backup profile will then be sent/copied to every target configured. A target can either be one of the following:
 
+> Note: setting `days_to_keep` to `-1` will disable backups rotation.
+
+> **Important note**: the `"dir"` directory must only contain backups from this instance. Any other file could be deleted during backups rotation.
+
+Once done, run the `./backup.py --test-config` command to check if everything's OK.
+
 #### Remote (SFTP)
 ```json
 {
@@ -138,11 +171,15 @@ Each backup profile will then be sent/copied to every target configured. A targe
 }
 ```
 
-> Note: setting `days_to_keep` to `-1` will disable backups rotation.
+#### S3
 
-> **Important note**: the `"dir"` directory must only contain backups from this instance. Any other file could be deleted during backups rotation.
-
-Once done, run the `./backup.py --test-config` command to check if everything's OK.
+```json
+{
+    "type": "s3",
+    "bucket": "my-server-backups",            // Bucket name
+    "profile": "my-.aws/credentials-profile"  // Name of the profile in your .aws/credentials file (fallbacks to "default")
+}
+```
 
 ## Usage
 You can either run it in its interactive mode (default), or specify the backup profile you want to run:

@@ -45,6 +45,11 @@
             "user": "john",
             "dir": "/home/john/backups/",
             "days_to_keep": 7
+        },
+        {
+            "type": "s3",
+            "bucket": "my-server-backups",
+            "profile": "my-.aws/credentials-profile"
         }
     ]
 }
