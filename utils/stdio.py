@@ -10,11 +10,11 @@ LGREEN = "\033[92m"
 LWARN  = "\033[93m"
 
 
-def ppexec(cmd):
+def ppexec(cmd: str, env = None) -> int:
     print("    [$ {}]".format(cmd))
     empty_line = bytes()
 
-    child = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True)
+    child = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True, env=env)
     for line in child.stdout:
         line = line.strip()
         if line == empty_line:

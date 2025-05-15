@@ -1,6 +1,7 @@
 import tarfile
 import os
 import shutil
+import subprocess
 import tempfile
 
 from utils import stdio
@@ -28,19 +29,40 @@ class MySQL:
 
         tar = tarfile.open('archive.tar.gz', 'w:gz')
 
+        # Parse database configuration
+        databases = backup.get('databases')
+        mysql_user_username = backup.get('database_user')
+        mysql_user_password = backup.get('database_password')
+
+        if databases == '*':
+            # List available databases
+            completed_process = subprocess.run(
+                ['mysql', '-u', mysql_user_username, '--silent', '--raw', '--skip-column-names', '-e', 'SHOW DATABASES;'],
+                capture_output=True,
+                text=True,
+                check=True,
+                env=dict(os.environ, MYSQL_PWD=mysql_user_password)
+            )
+            output = completed_process.stdout.strip('\n')
+            databases = output.split('\n')
+
+            # Remove system databases
+            databases.remove('mysql')
+            databases.remove('information_schema')
+            databases.remove('performance_schema')
+            databases.remove('sys')
+
         # Loop over databases
         successful_dumps = 0
-        for database in backup.get('databases'):
+        for database in databases:
             db_filename = database + '.sql'
 
             # Dump db
-            os.environ['MYSQL_PWD'] = backup.get('database_password')
             return_code = stdio.ppexec('mysqldump -u {user} --no-tablespaces {database} > {file_path}'.format(
-                user=backup.get('database_user'),
+                user=mysql_user_username,
                 database=database,
-                file_path=db_filename
-            ))
-            os.environ['MYSQL_PWD'] = ''
+                file_path=db_filename,
+            ), env=dict(os.environ, MYSQL_PWD=mysql_user_password))
 
             if return_code is None or return_code > 0:
                 print('   Got non-zero return code: {code}'.format(code=(return_code if return_code is not None else 'None')))
