@@ -34,6 +34,7 @@ config_filename_old = 'config.py'
 config_filepath = os.path.join(os.path.dirname(__file__), config_filename)
 config_filepath_old = os.path.join(os.path.dirname(__file__), config_filename_old)
 
+sentry_sdk = None
 
 # Functions
 def load_config():
@@ -57,7 +58,8 @@ def load_config():
     config['targets'] = json_config.get('targets', [])
 
     # Now that we know if Sentry should be enabled, load its sdk:
-    init_sentry()
+    global sentry
+    sentry = init_sentry()
 
 
 def send_file(backup, backup_filepath, target_profile):
@@ -146,12 +148,12 @@ def init_sentry():
 
 
 def handle_error(backup, exception, traceback):
+    global sentry_sdk
     # sentry
-    sentry = init_sentry()
-    if sentry is not None:
-        sentry.set_level('error')
-        sentry.set_tag('backup', backup.get('name'))
-        sentry.capture_exception(exception)
+    if sentry_sdk is not None:
+        sentry_sdk.set_level('error')
+        sentry_sdk.set_tag('backup', backup.get('name'))
+        sentry_sdk.capture_exception(exception)
 
     # mails
     email_addresses = config.get('alert_emails', None)
