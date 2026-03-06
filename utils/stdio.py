@@ -21,7 +21,7 @@ def ppexec(cmd: str, env = None) -> int:
             continue
         print(CDIM, "   " + line.decode("utf-8"), CRESET)
 
-    return child.poll()
+    return child.wait()
 
 
 def simple_exec(cmd, args=None):
